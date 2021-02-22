@@ -1,3 +1,4 @@
+#HELLO2u2
 #' Main script to generate daily mean SIF-based GPP for each yr
 #' grab spatial SIF, assign GPP-SIF slopes with gap filling for urban core
 
