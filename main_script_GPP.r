@@ -1,3 +1,4 @@
+memory.limit(size=5e5)
 #HELLO
 #' Main script to generate daily mean SIF-based GPP for each yr
 #' grab spatial SIF, assign GPP-SIF slopes with gap filling for urban core
@@ -35,23 +36,23 @@
 #' ---------------------------------------------------------------------------
 
 # source all functions and load all libraries
-homedir <- '/uufs/chpc.utah.edu/common/home'
-smurf_wd <- file.path(homedir, 'lin-group7/wde/SMUrF'); setwd(smurf_wd)
+homedir <- 'C:/Users/kitty/Documents/Research/SIF'
+smurf_wd <- file.path(homedir, 'SMUrF'); setwd(smurf_wd)
 source('r/dependencies.r') 
 
 # ---------------------------------------------------------------------------
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
-input.path  <- file.path(homedir, 'lin-group7/wde/input_data')
-output.path <- file.path(homedir, 'lin-group7/wde/output')
+input.path  <- file.path(homedir, 'SMUrF/data')
+output.path <- file.path(homedir, 'SMUrF/output2')
 
 # path for spatial CSIF, Zhang et al., 2018
-csif.cpath <- file.path(input.path, 'CSIF/clear_sky')   # clearsky CSIF
+csif.cpath <- file.path(input.path, 'CSIF')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html
-agb.path <- file.path(input.path, 'biomass/GlobBiomass')
+agb.path <- file.path(input.path, 'agb')
 
 # path for 500m IGBP, need to download from https://lpdaacsvc.cr.usgs.gov/appeears/
 lc.path    <- file.path(smurf_wd, 'data/MCD12Q1')
@@ -59,18 +60,18 @@ lc.pattern <- 'MCD12Q1.006_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
 # if no data beyond 2018, use 2018 LC for 2019 and beyond
-lc.max.yr <- 2018  
+lc.max.yr <- 2014  
 lc.res    <- 1/240     # horizontal grid spacing of land cover in degrees
 
 # raster operations may need temporary disk space for large calculations
 #tmpdir <- '/scratch/local/u0947337'
-tmpdir <- NA
+tmpdir <- 'C:/Users/kitty/AppData/Local/Temp/R'
 
 # ---------------------------------------------------------------------------
 # Variables one needs to modify 
 # ---------------------------------------------------------------------------
 # name and choose your desired region/nation and set a spatial extent
-indx <- 3
+indx <- 2
 reg.name <- c('westernCONUS', 'easternCONUS',     'westernEurope', 
               'easternChina', 'easternAustralia', 'easternAsia', 
               'southAmerica', 'centralAfrica')[indx]   
@@ -84,14 +85,14 @@ dir.create(gpp.path, recursive = T, showWarnings = F)
 #' (minlon, maxlon, minlat, laxlat) that matches above @param reg.name
 #' these lat/lon should follow the order of @param reg.name
 # *** too large a spatial extent may lead to memory issue, DONT DO ENTIRE GLOBE
-minlon <- c(-125, -95,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -65,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  25,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  50,   60,  50,  -10,  55, -10,  15)[indx]
+minlon <- c(-125, -80.6,  -11, 100,  130, 125, -65, -10)[indx]
+maxlon <- c( -95, -78.4,   20, 125,  155, 150, -40,  20)[indx]
+minlat <- c(  25,  42.5,   35,  20,  -40,  30, -40, -10)[indx]
+maxlat <- c(  50,  44.6,   60,  50,  -10,  55, -10,  15)[indx]
 #minlon = -90; maxlon = -80; minlat = 35; maxlat = 45
 
 # *** choose yrs, if multiple years, each thred will work on one year
-all.yrs <- seq(2010, 2014)
+all.yrs <- seq(2014, 2014)
 
 # ----------------------------------------------------------------------------
 # specify CSIF related parameters
@@ -114,10 +115,10 @@ slp.overwriteTF <- T
 # ---------------------------------------------------------------------------
 # slurm settings, each core will work on one year of GPP
 # ---------------------------------------------------------------------------
-n_nodes <- 5
+n_nodes <- 1
 n_cores <- 1                # max core # of 2 to avoid jobs being killed
 job.time <- '24:00:00'      # total job time
-slurm <- T                  # logical, whether to run parallel-ly
+slurm <- F                  # logical, whether to run parallel-ly
 slurm_options <- list(time = job.time, account = 'lin-kp', partition = 'lin-kp')
 jobname <- paste0('SMUrF_GPP_', reg.name)
 

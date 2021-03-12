@@ -119,6 +119,7 @@ pred.slp <- function(gpp.path,
     urban.slp.brk <- rasterFromXYZ(urban.slp.df[, c('x', 'y', 'SLP', 'INT', 'GPP_CV')])
     crs(urban.slp.brk) <- '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
     urban.slp.brk <- raster::extend(urban.slp.brk, extent(prep.stk))
+    names(urban.slp.brk) <- c('SLP', 'INT', 'GPP_CV')          #******** ADDED LAYER NAMES *******
     
     # merge gap-filled rasters back to initial rasters
     merge.slp <- raster::merge(urban.slp.brk$SLP, prep.stk$SLP)
