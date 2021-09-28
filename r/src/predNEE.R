@@ -57,7 +57,10 @@ predNEE <- function(reg.name = 'westernCONUS',
                             reco.file.num = num, overwriteTF = T)    
     
     reco.stk <- stack(reco.file, varname = 'Reco_mean')
-    all.dates <- as.POSIXct(as.numeric(gsub('X', '', names(reco.stk))), 
+    #all.dates <- as.POSIXct(as.numeric(gsub('X', '', names(reco.stk))), 
+    #                        origin = '1970-01-01 00:00:00', tz = 'UTC')
+    # NOTE: I REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
+    all.dates <- as.POSIXct(gsub('\\.','/',gsub('X', '', names(reco.stk))), 
                             origin = '1970-01-01 00:00:00', tz = 'UTC')
     all.timestr <- paste0(format(all.dates, format = '%Y%m%d'), '00')
 

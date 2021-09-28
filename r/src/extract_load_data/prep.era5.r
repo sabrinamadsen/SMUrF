@@ -23,8 +23,9 @@ prep.era5 <- function(era5.path, era5.varname = c('2T', 'SSRD', 'STL1', 'SWVL1')
     library(raster); library(dplyr); library(ncdf4)
     if (nchar(timestr) != 10) stop('prep.era5(): timestr should be in form of YYYYMMDDHH')
 
-    # load all Tair files
+    # load all Tair files 
     era5.files <- list.files(era5.path, era5.varname, full.names = T, recursive = T)
+    #era5.files <- list.files(era5.path, full.names = T, recursive = T)
 
     # ------------------------------------------------------------------------ #
     # locate the files needed for `timestr` and `nhrs` (if nhrs is not NULL)

@@ -22,7 +22,9 @@ crop.smurf.reco <- function(timestr, reco.file, nhrs, site.ext = NULL) {
     }
 
     # get reco rasterStack dimensions, second since 1970-01-01
-    reco.names <- as.numeric(gsub('X', '', names(reco.mean)))
+    #reco.names <- as.numeric(gsub('X', '', names(reco.mean)))
+    #NOTE: I REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
+    reco.names <- gsub('\\.','/',gsub('X', '', names(reco.mean)))
     reco.dates <- as.POSIXct(reco.names, origin = '1970-01-01 00:00:00', tz = 'UTC')
     reco.timestr <- as.numeric(paste0(format(reco.dates, '%Y%m%d')))
     reco.nd <- reco.timestr[2] - reco.timestr[1]       # temporal res in days

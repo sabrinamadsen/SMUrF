@@ -169,6 +169,9 @@ pred.slp <- function(gpp.path,
     # ------------------------------------------------------------------------ #
     # 5) aggregate slopes + uncertainty (calculate RMSE) to 0.05 deg, DW, 06/10/2019
     # ------------------------------------------------------------------------ #
+    
+    ##### THIS STEP NOT NECESSARY IF USING 500m x 500m TROPOMI SIF (does nothing)
+    
     cat('pred.slp(): 5) Aggregating slopes from 500 m to SIF"s resolution...\n')
     coarse.slp <- raster::aggregate(merge.slp, fact = sif.res / lc.res)
     coarse.int <- raster::aggregate(merge.int, fact = sif.res / lc.res)

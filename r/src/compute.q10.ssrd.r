@@ -95,7 +95,7 @@ if (F) {
     ggsave(it, filename = '../paper3/gmd2020/tscale_iscale_20180701.png',
            width = 12, height = 8)
 
-}
+}  #COMMENTED THIS OUT BECAUSE IT WAS CAUSING ISSUES (and it doesn't do anything)
 
 
 

@@ -11,18 +11,21 @@
 #' ---------------------------------------------------------------------------
 
 #args <- commandArgs(trailingOnly = TRUE)
+memory.limit(size=5e6)
 
 #### source all functions and load all libraries
-homedir <- '/uufs/chpc.utah.edu/common/home'
-smurf_wd <- file.path(homedir, 'lin-group7/wde/SMUrF'); setwd(smurf_wd) 
+homedir <- 'C:/Users/kitty/Documents/Research/SIF'
+smurf_wd <- file.path(homedir, 'SMUrF'); setwd(smurf_wd)
 source('r/dependencies.r')              # source all functions
 
 # ---------------------------------------------------------------------------
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 # input and output paths
-input.path  <- file.path(homedir, 'lin-group7/wde/input_data')
-output.path <- file.path(homedir, 'lin-group7/wde/output')
+input.path  <- file.path(homedir, 'SMUrF/data')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_TROPOMI_slps')
+#input.path  <- file.path(homedir, 'lin-group7/wde/input_data')
+#output.path <- file.path(homedir, 'lin-group7/wde/output')
 
 
 # ---------------------------------------------------------------------------
@@ -42,14 +45,14 @@ reco.dir <- 'daily_mean_Reco_neuralnet/era5'
 # please make sure this domain is <= than the domain of MODIS land cover,
 # 'minlon maxlon, minlat, laxlat' should matche the order of 'reg.name' above
 # *** too large a spatial extent may lead to memory issue, DONT DO ENTIRE GLOBE
-minlon <- c(-125, -95,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -65,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  25,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  50,   60,  50,  -10,  55, -10,  15)[indx]
+minlon <- c(-125, -80.7,  -11, 100,  130, 125, -65, -10)[indx]
+maxlon <- c( -95, -78.4,   20, 125,  155, 150, -40,  20)[indx]
+minlat <- c(  25,  42.5,   35,  20,  -40,  30, -40, -10)[indx]
+maxlat <- c(  50,  44.6,   60,  50,  -10,  55, -10,  15)[indx]
 
 # each processor works on each month
 yr <- 2018
-mons <- seq(1, 12)
+mons <- seq(3, 11)
 #yr <- as.numeric(args[2])
 #mons <- as.numeric(args[3])
 
@@ -58,7 +61,7 @@ mons <- seq(1, 12)
 TA.field   <- 'ERA5'
 SSRD.field <- c('ERA5', 'EPIC')[1]
 TA.path    <- file.path(input.path, TA.field, yr) 
-SSRD.path  <- file.path(input.path, SSRD.field, yr) 
+SSRD.path  <- file.path(input.path, SSRD.field, yr, 'Editted_SSRD') 
 
 # common portions in the filenames before YYYY* for grabbing all available files
 # here are examples of the suitable filenames: 
@@ -77,7 +80,7 @@ SSRD.varname <- c('SSRD', NA)[1]
 jobtime <- '1:00:00'      # total job time
 n_nodes <- 1   
 n_cores <- 1
-slurm   <- T      # False for not running parallelly
+slurm   <- F      # False for not running parallelly
 slurm_options <- list(time = jobtime, account = 'lin-kp', partition = 'lin-kp')
 jobname <- paste('SMUrF_NEE', reg.name, yr, sep = '_') 
 message(jobname)

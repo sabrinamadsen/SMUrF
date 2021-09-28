@@ -45,10 +45,11 @@ source('r/dependencies.r')
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_TROPOMI_slps')
+
 
 # path for spatial CSIF, Zhang et al., 2018
-csif.cpath <- file.path(input.path, 'CSIF')   # clearsky CSIF
+csif.cpath <- file.path(input.path, 'TROPOSIF/2018/4_day_buffered_SMUrF')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html
@@ -60,7 +61,7 @@ lc.pattern <- 'MCD12Q1.006_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
 # if no data beyond 2018, use 2018 LC for 2019 and beyond
-lc.max.yr <- 2014  
+lc.max.yr <- 2018  
 lc.res    <- 1/240     # horizontal grid spacing of land cover in degrees
 
 # raster operations may need temporary disk space for large calculations
@@ -92,20 +93,20 @@ maxlat <- c(  50,  44.6,   60,  50,  -10,  55, -10,  15)[indx]
 #minlon = -90; maxlon = -80; minlat = 35; maxlat = 45
 
 # *** choose yrs, if multiple years, each thred will work on one year
-all.yrs <- seq(2014, 2014)
+all.yrs <- seq(2018, 2018)
 
 # ----------------------------------------------------------------------------
 # specify CSIF related parameters
 # ----------------------------------------------------------------------------
 sif.prod <- 'CSIFclear'
-sif.var  <- 'clear_daily_SIF'
+sif.var  <- 'daily_sif'
 sif.nd   <- 4         # temporal resoultion, every 4 or 8 days
-sif.res  <- 0.05      # 0.05 deg res
-sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero
+sif.res  <- 1/240 #0.004166667 #0.00449167 #500*180/(6.378*10**6*pi) # 0.05 deg res
+sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero *** MAYBE CHANGE ***
 sif.path <- csif.cpath 
 
 # txtfile that store GPP-SIF relation
-slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_stat_Wu.txt') 
+slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_TROPOMI.txt') 
 
 #' whether to re-generate and store 500 m GPP-SIF slopes as tif files in 'gpp.path'
 #' if you change @param slp.file, you need to turn on this flag
@@ -142,6 +143,7 @@ message('Number of parallel threads: ', n_nodes * n_cores)
 
 # start running model parallel-ly, only `all.yrs` can be a vector
 # other variables should be a vector or a list
+
 smurf_apply(FUN = predGPP, slurm, slurm_options, n_nodes, n_cores, jobname, 
             reg.name, minlon, maxlon, minlat, maxlat, yr = all.yrs, 
             lc.path, lc.pattern, lc.max.yr, lc.res, agb.file, ratio.file, 

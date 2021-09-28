@@ -134,36 +134,36 @@ predReco_biome <- function(reg.name = 'westernCONUS',
 
 
     # ------------ Step 3. AGGREGATE fluxes from 500m to 0.05deg ------------- #
-    cat('predReco(): # ------- Step 3: Aggregating 500m Reco to 0.05deg -------- #\n')
+    #cat('predReco(): # ------- Step 3: Aggregating 500m Reco to 0.05deg -------- #\n')
 
     # factor in each lon/lat direction, total N is fact^2
     # aggregating best-estimated Reco from 500m to 0.05deg
     # do not use projectRaster, DW, 08/13/2019
     # use aggregate, its default operation is taking the mean of all 500m reco
-    fact <- res(mean.gpp.rt)[1] / res(mean.reco.rt)[1]  
-    mean.reco.agg <- raster::aggregate(mean.reco.rt, fact = fact) 
+    #fact <- res(mean.gpp.rt)[1] / res(mean.reco.rt)[1]  
+    #mean.reco.agg <- raster::aggregate(mean.reco.rt, fact = fact) 
 
     # calculate the sum of error variances 
-    sd.reco.agg <- sqrt(raster::aggregate(sd.reco.rt^2, fact = fact, FUN = mean))  
+    #sd.reco.agg <- sqrt(raster::aggregate(sd.reco.rt^2, fact = fact, FUN = mean))  
 
     # if reco_sd grid does not match gpp grid, then reproject after above aggregation
-    if (compareRaster(mean.reco.agg, mean.gpp.rt) * 
-        compareRaster(sd.reco.agg,   mean.gpp.rt) == 0) {
-        mean.reco.agg <- raster::projectRaster(mean.reco.agg, mean.gpp.rt)  
-        sd.reco.agg <- raster::projectRaster(sd.reco.agg, mean.gpp.rt)  
-    }   # end if
+    #if (compareRaster(mean.reco.agg, mean.gpp.rt) * 
+    #    compareRaster(sd.reco.agg,   mean.gpp.rt) == 0) {
+    #    mean.reco.agg <- raster::projectRaster(mean.reco.agg, mean.gpp.rt)  
+    #    sd.reco.agg <- raster::projectRaster(sd.reco.agg, mean.gpp.rt)  
+    #}   # end if
 
 
     # ---------------------- force negative Reco as zero --------------------- #
     # negative Reco occurs due to potential NN extrapolation, DW, 06/18/2019 
     # where modeled gridded temperatures < observed temperatures
-    mean.reco.agg[mean.reco.agg < 0] <- 0   
-    sd.reco.agg[sd.reco.agg < 0] <- 0   
+    mean.reco.rt[mean.reco.rt < 0] <- 0   
+    sd.reco.rt[sd.reco.rt < 0] <- 0   
 
     # ***** names of each rasterLayer or stack should indicate the time, 
     #       with correct form in POSIXct() initially *****
-    names(mean.reco.agg) <- as.POSIXct(timestr, format = '%Y%m%d%H', tz = 'UTC')
-    names(sd.reco.agg) <- as.POSIXct(timestr, format = '%Y%m%d%H', tz = 'UTC')
+    names(mean.reco.rt) <- as.POSIXct(timestr, format = '%Y%m%d%H', tz = 'UTC')
+    names(sd.reco.rt) <- as.POSIXct(timestr, format = '%Y%m%d%H', tz = 'UTC')
 
     # as a sanity check, plot GPP and Reco 
     #levelplot(stack(mean.gpp.rt, mean.reco.agg))
@@ -177,7 +177,7 @@ predReco_biome <- function(reg.name = 'westernCONUS',
                    '1-sigma Uncertainty of Daily Mean Ecosystem Respiration')
     zformat <- 'X%Y.%m.%d'
 
-    stk.list <- list(mean.reco.agg, sd.reco.agg); names(stk.list) <- varnames
+    stk.list <- list(mean.reco.rt, sd.reco.rt); names(stk.list) <- varnames
     reco.fn <- file.path(reco.path, paste0('daily_mean_Reco_uncert_', reg.name, '_', 
                                            substr(timestr, 1, 8), '.nc'))
 
