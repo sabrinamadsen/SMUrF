@@ -36,7 +36,7 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_TROPOMI_slps')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps')
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')
@@ -61,17 +61,17 @@ cat(paste('Working on', reg.name, '...\n'))
 # please make sure this domain is <= than the domain of MODIS land cover,
 # 'minlon maxlon, minlat, laxlat' should matche the order of 'reg.name' above
 # *** too large a spatial extent may lead to memory issue, DONT DO ENTIRE GLOBE
-minlon <- c(-125, -80.6,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -78.4,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  42.5,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  44.6,   60,  50,  -10,  55, -10,  15)[indx]
+minlon <- c(-125, -80.9,  -11, 100,  130, 125, -65, -10)[indx]
+maxlon <- c( -95, -78.3,   20, 125,  155, 150, -40,  20)[indx]
+minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
+maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 
 # due to limited storage, let's break one year into different months
 #yr  <- args[2]    # get year string from python code, YYYY e.g., '2018'
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
 yr <- '2018'
-mon <- '12'
+mon <- '11'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
                                formatC(lubridate::days_in_month(start.date),
@@ -138,6 +138,7 @@ smurf_apply(FUN = predReco_biome, slurm, slurm_options, n_nodes, n_cores, jobnam
             reg.name, reg.path, minlon, maxlon, minlat, maxlat, timestr, 
             lc.path, lc.pattern, TA.path, TA.field, TA.varname, TS.path, 
             TS.field, TS.varname, nn.pattern, nn.platform, smurf_wd, tmpdir)
+
 
 print('Done!')
 q('no')

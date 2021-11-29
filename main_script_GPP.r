@@ -45,11 +45,11 @@ source('r/dependencies.r')
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_TROPOMI_slps')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps')
 
 
 # path for spatial CSIF, Zhang et al., 2018
-csif.cpath <- file.path(input.path, 'TROPOSIF/2018/4_day_buffered_SMUrF')   # clearsky CSIF
+csif.cpath <- file.path(input.path, 'TROPOSIF/2018/4_day_buffered_expanded/4_day')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html
@@ -86,10 +86,10 @@ dir.create(gpp.path, recursive = T, showWarnings = F)
 #' (minlon, maxlon, minlat, laxlat) that matches above @param reg.name
 #' these lat/lon should follow the order of @param reg.name
 # *** too large a spatial extent may lead to memory issue, DONT DO ENTIRE GLOBE
-minlon <- c(-125, -80.6,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -78.4,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  42.5,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  44.6,   60,  50,  -10,  55, -10,  15)[indx]
+minlon <- c(-125, -80.9,  -11, 100,  130, 125, -65, -10)[indx]
+maxlon <- c( -95, -78.3,   20, 125,  155, 150, -40,  20)[indx]
+minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
+maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #minlon = -90; maxlon = -80; minlat = 35; maxlat = 45
 
 # *** choose yrs, if multiple years, each thred will work on one year
@@ -106,7 +106,7 @@ sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero *** MAYBE CHA
 sif.path <- csif.cpath 
 
 # txtfile that store GPP-SIF relation
-slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_TROPOMI.txt') 
+slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_Slopes_Converted_TROPOMI.txt') 
 
 #' whether to re-generate and store 500 m GPP-SIF slopes as tif files in 'gpp.path'
 #' if you change @param slp.file, you need to turn on this flag
@@ -118,6 +118,7 @@ slp.overwriteTF <- T
 # ---------------------------------------------------------------------------
 n_nodes <- 1
 n_cores <- 1                # max core # of 2 to avoid jobs being killed
+
 job.time <- '24:00:00'      # total job time
 slurm <- F                  # logical, whether to run parallel-ly
 slurm_options <- list(time = job.time, account = 'lin-kp', partition = 'lin-kp')

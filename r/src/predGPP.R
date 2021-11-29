@@ -82,7 +82,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     #             according to Zhang et al. (2018), urban SIF may have an 
     #             underestimation of about 14.5%, thus we simply scale up 
     #             GPP-SIF slopes for MODIS-based urban areas
-    bias.corrTF <- FALSE; if (grepl('CSIF', sif.prod)) bias.corrTF <- TRUE
+    bias.corrTF <- FALSE #; if (grepl('CSIF', sif.prod)) bias.corrTF <- TRUE
 
     # Gap filling for urban SLOPEs by calling pred.slp.urban(), return a data.frame
     # see Wu et al. GMD, 2020 & calc.tree.type.frac.r for details, 03/28/2020
@@ -108,8 +108,9 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
 
     ## loop over every 4 days in a particular yr
     gpp.mean.stk <- gpp.sd.stk <- sif.stk <- NULL    # initialize
-    looplength<-length(all.timestr)-6
+    looplength<-length(all.timestr)-6 #include -6 in 2018 and -2 in 2019 (missing Dec files)
     for (tt in 16 : looplength) { 
+    #for (tt in 2 : looplength) { # for 2019, only missing first few
         #start at 16 to avoid missing data at beginning of year
         #end 6 before the end of the year to avoid missing data
         #tt<-21
@@ -173,7 +174,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     zformat <- 'X%Y.%m.%d'
 
     # assign correct layer names 
-    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[16:86]
+    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[16:86]#[2:90]#[16:86]
     #take only dates that were used in loop above
     
     # order of this list should match all variables above e.g., varnames
