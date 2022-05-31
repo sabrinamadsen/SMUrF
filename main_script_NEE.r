@@ -52,7 +52,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 
 # each processor works on each month
 yr <- 2018
-mons <- seq(3, 11)
+mons <- 12 # seq(3, 11)
 #yr <- as.numeric(args[2])
 #mons <- as.numeric(args[3])
 
@@ -96,5 +96,5 @@ smurf_apply(FUN = predNEE, slurm, slurm_options, n_nodes, n_cores, jobname,
             reg.name, reg.path, reco.dir, yyyymm = all.yyyymm, TA.path, TA.field, 
             TA.varname, SSRD.path, SSRD.field, SSRD.varname, smurf_wd)
 
- q('no')
+q('no')
 # end of script

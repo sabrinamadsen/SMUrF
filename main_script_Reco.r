@@ -71,7 +71,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
 yr <- '2018'
-mon <- '11'
+mon <- '12'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
                                formatC(lubridate::days_in_month(start.date),
