@@ -3,7 +3,8 @@
 
 # timestr in form of YYYYMMDDHH
 # ext: generated from raster::extent(), e.g., minlon, maxlon, minlat, maxlat
-grab.csif <- function(csif.path, timestr, ext = NULL, nhrs = NULL,
+grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname, 
+                      ext = NULL, nhrs = NULL,
                       var = c('clear_inst_SIF', 'clear_daily_SIF', 
                               'all_inst_SIF', 'all_daily_SIF')[2], 
                       form = c('df', 'raster')[2]) {
@@ -35,6 +36,28 @@ grab.csif <- function(csif.path, timestr, ext = NULL, nhrs = NULL,
       # grab and crop CSIF according to 'var'
       sel.csif <- crop(stack(csif.file, varname = var), ext)
       if (nlayers(sel.csif) > 1) sel.csif <- mean(sel.csif)
+      #Also grab and crop temperature data
+      # Load hourly TA (deg C) and incoming SW from ERA5
+      # use nhrs = 23 to grab all hourly variables in a day 
+      
+      # create 4day mean interval that matches GPP 
+      yr <- substr(search.timestr, 1, 4)
+      date4 <- seq(as.Date(paste0(yr, '-01-01')), as.Date(paste0(yr, '-12-31')), by = '4 days')
+      timestr4 <- paste0(format(date4, format = '%Y%m%d'), '00')
+      # find the start time of the 4-day interval that "timestr" fall into 
+      find.timestr <- timestr4[findInterval(time.info$find.timestr, timestr4)]
+      
+      #temp.timestr<-rep(time.info$max.timestr,24)
+      #cat(paste('\ngrab.csif(): Loading hourly TA for', timestr, '\n'))
+      if (sif.temp==TRUE) {     # hourly air temp in UTC
+        TA.brk <- prep.era5(TA.path, TA.varname, timestr = find.timestr, 
+                              ext, nhrs = 24 * 4)
+        TA.pj   <- raster::projectRaster(TA.brk, sel.csif) # in degC
+        
+        TA.mean <- mean(TA.pj)
+        sel.csif[0 >= TA.mean]<-TA.mean[0 >= TA.mean]*0
+      }
+      
 
       if (form == 'df') {
         sel.csif <- raster::as.data.frame(sel.csif, xy = T)

@@ -53,6 +53,10 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
                     sif.nd = 4,             # in days 
                     sif.res = 0.05,         # in deg
                     sif.rmTF = T,    # whether to force negative SIF as ZERO
+                    sif.temp = T,
+                    
+                    TA.path, 
+                    TA.varname,
 
                     gpp.path, 
                     smurf_wd,    # path for bio model repo
@@ -109,7 +113,8 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     ## loop over every 4 days in a particular yr
     gpp.mean.stk <- gpp.sd.stk <- sif.stk <- NULL    # initialize
     looplength<-length(all.timestr) #include -6 in 2018 and -2 in 2019 (missing Dec files)
-    for (tt in 16 : looplength) { 
+    for (tt in 15 : looplength) { #for 4-day res 
+    #for (tt in 5 : looplength){ #for 8-day res
     #for (tt in 2 : looplength) { # for 2019, only missing first few
         #start at 16 to avoid missing data at beginning of year
         #end 6 before the end of the year to avoid missing data
@@ -122,7 +127,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
         # ------------- 2.1 Grab spatial SIF and compute uncertainty --------- #
         ## grab two spatial SIF, they can be negative
         if (grepl('CSIF', sif.prod)) 
-            sif.rt <- grab.csif(sif.path, timestr, ext = reg.ext, var = sif.var) 
+            sif.rt <- grab.csif(sif.path, timestr, sif.temp, TA.path, TA.varname, ext = reg.ext, var = sif.var) 
             #sif.rt <- grab.tsif(sif.path, timestr, minlon, maxlon, minlat, maxlat)
         
         if (is.null(sif.rt)) stop(paste('predGPP(): No SIF file found for', 
@@ -134,7 +139,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
         gpp.stk <- compute.gpp(sif.rt, prep.coarse)
 
         # save rasterLayer
-        if (tt == 16) { 
+        if (tt == 15) { 
             sif.stk      <- sif.rt 
             gpp.mean.stk <- gpp.stk$GPP_mean
             gpp.sd.stk   <- gpp.stk$GPP_sd 
@@ -146,7 +151,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
         }   # end if tt == 1
 
         # generate a plot for one summertime day
-        if (tt == 60) {     
+        if (tt == 50) {     
             plot.stk <- gpp.stk
             g1 <- gridExtra::grid.arrange(levelplot(plot.stk, maxpixel = 1e6))
             title <- paste('4-day mean 0.05◦ GPP and uncertainty [umol m-2 s-1] for', 
@@ -174,7 +179,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     zformat <- 'X%Y.%m.%d'
 
     # assign correct layer names 
-    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[16:92]#[2:90]#[16:86]
+    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[15:92]#[5:46]#[15:92]#[2:90]#[16:86]
     #take only dates that were used in loop above
     
     # order of this list should match all variables above e.g., varnames

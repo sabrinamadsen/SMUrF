@@ -52,7 +52,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 
 # each processor works on each month
 yr <- 2018
-mons <- 12 # seq(3, 11)
+mons <- seq(3, 12)
 #yr <- as.numeric(args[2])
 #mons <- as.numeric(args[3])
 

@@ -105,6 +105,11 @@ sif.res  <- 1/240 #0.004166667 #0.00449167 #500*180/(6.378*10**6*pi) # 0.05 deg 
 sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero *** MAYBE CHANGE ***
 sif.path <- csif.cpath 
 
+sif.temp <- TRUE  # if TRUE, force SIF values to zero if the average temperature is below 0C
+TA.field   <- 'ERA5'
+TA.path    <- file.path(input.path, TA.field, all.yrs) 
+TA.varname <- '2T'
+
 # txtfile that store GPP-SIF relation
 slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_Slopes_Converted_TROPOMI.txt') 
 
@@ -148,8 +153,9 @@ message('Number of parallel threads: ', n_nodes * n_cores)
 smurf_apply(FUN = predGPP, slurm, slurm_options, n_nodes, n_cores, jobname, 
             reg.name, minlon, maxlon, minlat, maxlat, yr = all.yrs, 
             lc.path, lc.pattern, lc.max.yr, lc.res, agb.file, ratio.file, 
-            sif.prod, sif.path, sif.var, sif.nd, sif.res, sif.rmTF, 
-            gpp.path, smurf_wd, slp.file, slp.overwriteTF, tmpdir)
+            sif.prod, sif.path, sif.var, sif.nd, sif.res, sif.rmTF, sif.temp, 
+            TA.path, TA.varname, gpp.path, smurf_wd, slp.file, 
+            slp.overwriteTF, tmpdir)
 
 q('no')
 
