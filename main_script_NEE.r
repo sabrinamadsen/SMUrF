@@ -11,7 +11,7 @@
 #' ---------------------------------------------------------------------------
 
 #args <- commandArgs(trailingOnly = TRUE)
-memory.limit(size=5e5)
+memory.limit(size=5e9)
 
 #### source all functions and load all libraries
 homedir <- 'C:/Users/kitty/Documents/Research/SIF'
@@ -23,7 +23,7 @@ source('r/dependencies.r')              # source all functions
 # ---------------------------------------------------------------------------
 # input and output paths
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_downscaled_CSIF_ALL_converted_slps_temp_8day')
 #input.path  <- file.path(homedir, 'lin-group7/wde/input_data')
 #output.path <- file.path(homedir, 'lin-group7/wde/output')
 
@@ -52,7 +52,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 
 # each processor works on each month
 yr <- 2018
-mons <- seq(3, 12)
+mons <- seq(1,12)
 #yr <- as.numeric(args[2])
 #mons <- as.numeric(args[3])
 

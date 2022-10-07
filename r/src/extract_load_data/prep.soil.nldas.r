@@ -55,7 +55,7 @@ prep.soil.nldas <- function(nldas.path, nldas.varname = c('TSOIL', 'SOILM')[1],
     names(nldas.brk) <- sel.nldas.info$timestr  # assign names to layers
 
     # unit corrections
-    if (nldas.varname == 'TSOIL') {
+    if (nldas.varname == 'TSOIL' | grep('SoilT',nldas.varname)==1) {
         cat('prep.soil.nldas(): *** unit corrections (degC for TSOIL)\n')
         nldas.brk <- calc(nldas.brk, fun = function(x) { x - 273.15 }) 
     }

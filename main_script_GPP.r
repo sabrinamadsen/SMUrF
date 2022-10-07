@@ -45,11 +45,13 @@ source('r/dependencies.r')
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_downscaled_CSIF_ALL_converted_slps_temp_8day')
 
 
 # path for spatial CSIF, Zhang et al., 2018
-csif.cpath <- file.path(input.path, 'TROPOSIF/2018/4_day_buffered_expanded/4_day')   # clearsky CSIF
+#csif.cpath <- file.path(input.path, 'TROPOSIF/2018/8_day/8_day')   # clearsky CSIF
+# path for downscaled TROPOMI SIF filled with downscaled & adjusted CSIF
+csif.cpath <- file.path(input.path, 'downscaled_CSIF/downscaled_CSIF/2018')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html
@@ -100,18 +102,18 @@ all.yrs <- seq(2018, 2018)
 # ----------------------------------------------------------------------------
 sif.prod <- 'CSIFclear'
 sif.var  <- 'daily_sif'
-sif.nd   <- 4         # temporal resoultion, every 4 or 8 days
+sif.nd   <- 8         # temporal resoultion, every 4 or 8 days
 sif.res  <- 1/240 #0.004166667 #0.00449167 #500*180/(6.378*10**6*pi) # 0.05 deg res
 sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero *** MAYBE CHANGE ***
 sif.path <- csif.cpath 
 
-sif.temp <- TRUE  # if TRUE, force SIF values to zero if the average temperature is below 0C
+sif.temp <- TRUE  # if TRUE, force SIF values to zero if the average temperature is below 0C MAYBE USE MAX TEMP INSTEAD?
 TA.field   <- 'ERA5'
 TA.path    <- file.path(input.path, TA.field, all.yrs) 
 TA.varname <- '2T'
 
 # txtfile that store GPP-SIF relation
-slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_Slopes_Converted_TROPOMI.txt') 
+slp.file <- file.path(smurf_wd, 'data/GPP-CSIF_Slopes_All_Converted_TROPOMI.txt') 
 
 #' whether to re-generate and store 500 m GPP-SIF slopes as tif files in 'gpp.path'
 #' if you change @param slp.file, you need to turn on this flag

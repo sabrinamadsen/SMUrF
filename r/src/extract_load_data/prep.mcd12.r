@@ -31,7 +31,8 @@ prep.mcd12 <- function(lc.path, lc.pattern, yr = '2018', lc.max.yr,
             layer.indx <- findInterval(yr, lc.names)
             lc.rt      <- raster::crop(subset(lc.stk, layer.indx), reg.ext)
         } else lc.rt <- raster::crop(lc.stk, reg.ext)   # end if subset layers
-
+        #NOTE THIS NEEDS TO BE COMMENTED OUT FOR EVERYWHERE OUTSIDE TORONTO
+        #lc.rt[values(lc.rt)==9]<-8 #replace savanna with woody savanna to fix fluxes at the rouge
     }   # end if LC file        
     return(lc.rt)
 }

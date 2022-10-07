@@ -36,7 +36,7 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_downscaled_CSIF_ALL_converted_slps_temp_8day')
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')
@@ -102,12 +102,12 @@ nn.indx <- 2
 TA.field   <- c('daymet', 'ERA5')[nn.indx]
 TS.field   <- c('NLDAS',  'ERA5')[nn.indx]
 TA.varname <- c('daymet_v3', '2T')[nn.indx]
-TS.varname <- c('TSOIL',  'STL1')[nn.indx]
+TS.varname <- c('SoilT_0_10cm',  'STL1')[nn.indx]
 
 # which NN model to predict Reco, these should match the temp field you chose 
 # e.g., if you used ERA5 temp, you need to have NN models trained ysing era5
 nn.pattern  <- c('daymet_nldas', 'era5')[nn.indx]           
-nn.platform <- 'neuralnet'
+nn.platform <- 'neuralnet' #'keras' 
 # pretrained models are stored under "data/NN_models"
 # nn.dir <- file.path(smurf_wd, 'data/NN_models/neuralnet')
 
