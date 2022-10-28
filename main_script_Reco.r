@@ -36,7 +36,7 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_downscaled_CSIF_ALL_converted_slps_temp_8day')
+output.path <- file.path(homedir, 'SMUrF/output2019_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_8day')
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')
@@ -70,7 +70,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #yr  <- args[2]    # get year string from python code, YYYY e.g., '2018'
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
-yr <- '2018'
+yr <- '2019'
 mon <- '12'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
