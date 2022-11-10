@@ -3,7 +3,7 @@
 prep.input4reco <- function(reg.ext, reg.path, reg.name, timestr, 
                             TA.field, TA.path, TA.varname,
                             TS.field, TS.path, TS.varname, 
-                            lc.path, lc.pattern, gpp.file) {
+                            lc.path, lc.pattern, ISA.path, ISA.pattern, gpp.file) {
 
     # ---------------------- Step 1.1 PREPARE Tair --------------------------- #
     ## numbers of hrs (forward or backward) for aggregating and averaging from 00UTC
@@ -76,7 +76,13 @@ prep.input4reco <- function(reg.ext, reg.path, reg.name, timestr,
     # select and prepare daily mean GPP in the correct form via prep.gpp()
     gpp.stk <- crop.smurf.gpp(timestr, gpp.file, nhrs, reg.ext)
 
-
+    # ---------------------- Step 1.5b Prepare ISA -------------------------- #
+    #ISA.path <- 'C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface'
+    #ISA.pattern <- 'all_aggregated_impervious_63_entire_GTA'
+    
+    isa.rt <- prep.isa(ISA.path, ISA.pattern, yr, isa.max.yr = 2018, reg.name, reg.ext)/100
+    
+    
     # ---------------------- Step 1.5 REPROJECTION -------------------------- #
     ## re-project mean Tsoil and Tair to 500m land cover data with bilinear interpolation 
     cat('prep.input4reco(): Reprojecting Tair, Tsoil, GPP to 500m to match MCD IGBP...\n')
@@ -97,7 +103,7 @@ prep.input4reco <- function(reg.ext, reg.path, reg.name, timestr,
     
     # combine results
     outlist <- list(input.brk = input.brk, lc.rt = lc.rt, c3c4.stk = c3c4.stk, 
-                    fveg.stk = fveg.stk, init.gpp.stk = gpp.stk)
+                    fveg.stk = fveg.stk, isa=isa.rt, init.gpp.stk = gpp.stk)
 
     return(outlist)
 

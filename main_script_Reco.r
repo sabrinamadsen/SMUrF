@@ -36,7 +36,7 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2019_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_8day')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_8day')
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')
@@ -44,6 +44,8 @@ lc.pattern <- 'MCD12Q1.006_LC_Type1'
 #tmpdir <- '/scratch/local/u0947337'  # raster operation may need temporary disk space
 tmpdir <- 'C:/Users/kitty/AppData/Local/Temp/R' #NA
 
+ISA.path <- 'C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface'
+ISA.pattern <- 'all_aggregated_impervious_63_entire_GTA'
 # ---------------------------------------------------------------------------
 # Variables one needs to modify 
 # ---------------------------------------------------------------------------
@@ -70,7 +72,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #yr  <- args[2]    # get year string from python code, YYYY e.g., '2018'
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
-yr <- '2019'
+yr <- '2018'
 mon <- '12'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
@@ -115,7 +117,6 @@ nn.platform <- 'neuralnet' #'keras'
 TA.path <- ifelse(TA.field == 'daymet', daymet.path, era5.path)
 TS.path <- ifelse(TS.field == 'NLDAS', nldas.path, era5.path)
 
-
 # ---------------------------------------------------------------------------
 # use SLURM for parallel simulation settings
 # ---------------------------------------------------------------------------
@@ -137,7 +138,7 @@ message('Number of parallel threads: ', n_nodes * n_cores)
 smurf_apply(FUN = predReco_biome, slurm, slurm_options, n_nodes, n_cores, jobname, 
             reg.name, reg.path, minlon, maxlon, minlat, maxlat, timestr, 
             lc.path, lc.pattern, TA.path, TA.field, TA.varname, TS.path, 
-            TS.field, TS.varname, nn.pattern, nn.platform, smurf_wd, tmpdir)
+            TS.field, TS.varname, nn.pattern, nn.platform, ISA.path, smurf_wd, tmpdir)
 
 
 print('Done!')

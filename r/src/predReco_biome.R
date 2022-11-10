@@ -64,15 +64,15 @@ predReco_biome <- function(reg.name = 'westernCONUS',
                            lc.path,   
                            lc.pattern, 
 
-                           TA.path, 
+                           TA.path,
                            TA.field = c('daymet', 'ERA5')[1], 
                            TA.varname = c('daymet_v3', '2T')[1], 
                            TS.path, 
                            TS.field = c('NLDAS', 'ERA5')[1], 
                            TS.varname = c('TSOIL', 'STL1')[1], 
                            nn.pattern = c('daymet_nldas', 'era5')[1],  
-                           nn.platform = c('keras', 'neuralnet')[1], 
-
+                           nn.platform = c('keras', 'neuralnet')[1],
+                           ISA.path,
                            smurf_wd = getwd(),  # working directory 
                            tmpdir = NA) {
   
@@ -106,7 +106,8 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     prep.list <- prep.input4reco(reg.ext, reg.path, reg.name, timestr, 
                                  TA.field, TA.path, TA.varname, 
                                  TS.field, TS.path, TS.varname, 
-                                 lc.path, lc.pattern, gpp.file) 
+                                 lc.path, lc.pattern, ISA.path, ISA.pattern,
+                                 gpp.file) #May need to do ISA separately
     mean.gpp.rt <- prep.list$init.gpp.stk$GPP_mean  # best-estimated GPP at 0.05deg
     
 
@@ -152,13 +153,42 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     #    mean.reco.agg <- raster::projectRaster(mean.reco.agg, mean.gpp.rt)  
     #    sd.reco.agg <- raster::projectRaster(sd.reco.agg, mean.gpp.rt)  
     #}   # end if
-
-
+    
+    # ------------ Reduce soil respiration over impervious surfaces ---------- #
+    #The code below is from UrbanVPRM.
+    Ra = 0.5*mean.reco.rt 
+    Rh = 0.5*mean.reco.rt #About half of respiration is from soil
+    Ra_err = 0.5*sd.reco.rt
+    Rh_err = 0.5*sd.reco.rt
+    
+    
+    Rh[prep.list$isa>0.05] = Rh[prep.list$isa>0.05] * (1-prep.list$isa[prep.list$isa>0.05])
+    Rh_err[prep.list$isa>0.05] = Rh_err[prep.list$isa>0.05] * (1-prep.list$isa[prep.list$isa>0.05])
+    #if(prep.list$isa > 0.05){
+    #  ## Modify Re components: Rh is reduced by ISA and Ra is reduced by EVI 
+    #  Rh = Rh * (1-isa)
+    #  Rh_err = Rh_err * (1-isa)
+    #  # Ra reduced by EVI, but rescaled to maintain min EVI
+    #  #EVI_scale = EVI/EVI_ref
+    #  #EVI_scale[!(EVI_ref>0.05)] = 1
+    #  #EVI_scale[EVI_scale>1] = 1
+    #  #EVI_scale[EVI_scale<0] = 0
+    #  #Ra = Ra * EVI_scale 
+    #  #EVI_scale = as.data.frame(as.numeric(EVI_scale))
+    ##} else {
+    #  ### if no ISA in pixel, no scaling
+    #  #EVI_scale = as.data.frame(rep(NA,time=length(Re)))
+    ##}
+    
+    # Put the respiration components back together
+    mean.reco.rt = Ra + Rh
+    sd.reco.rt = Ra_err + Rh_err
+    
     # ---------------------- force negative Reco as zero --------------------- #
     # negative Reco occurs due to potential NN extrapolation, DW, 06/18/2019 
     # where modeled gridded temperatures < observed temperatures
     mean.reco.rt[mean.reco.rt < 0] <- 0   
-    sd.reco.rt[sd.reco.rt < 0] <- 0   
+    sd.reco.rt[sd.reco.rt < 0] <- 0
 
     # ***** names of each rasterLayer or stack should indicate the time, 
     #       with correct form in POSIXct() initially *****
