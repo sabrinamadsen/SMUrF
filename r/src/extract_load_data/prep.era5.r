@@ -40,7 +40,8 @@ prep.era5 <- function(era5.path, era5.varname = c('2T', 'SSRD', 'STL1', 'SWVL1')
     last.date <- seq.dates[length(seq.dates)]
 
     # check to see if last.date is the last day of a month
-    dom <- lubridate::days_in_month(as.numeric(substr(last.date, 6, 7)))
+    # I adjusted the line below so it works for leap-years (now includes year and month not just month)
+    dom <- lubridate::days_in_month(substr(last.date, 1, 10))
     if (as.numeric(substr(last.date, 9, 10)) == dom && substr(last.date, 12, 13) == '23') {
         cat('prep.era5(): encountered the last day of a month, need to grab an additional file\n')
         new.date <- last.date + 1 * 3600 
@@ -60,6 +61,8 @@ prep.era5 <- function(era5.path, era5.varname = c('2T', 'SSRD', 'STL1', 'SWVL1')
             tmp.file <- era5.files[grepl(substr(timestr, 1, 4), era5.files)]
             if (length(era5.file) == 0) 
                 stop(paste('prep.era5(): NO era5 file found for', m))
+        }else if (length(tmp.file) > 1 ){
+            tmp.file <- tmp.file[grepl(reg.name,tmp.file)]
         }   # end if
         
         era5.file <- c(era5.file, tmp.file)

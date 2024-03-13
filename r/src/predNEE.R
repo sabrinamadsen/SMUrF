@@ -64,7 +64,7 @@ predNEE <- function(reg.name = 'westernCONUS',
                             origin = '1970-01-01 00:00:00', tz = 'UTC')
     all.timestr <- paste0(format(all.dates, format = '%Y%m%d'), '00')
 
-    nee.path <- file.path(reg.path, paste0('hourly_flux_', tolower(SSRD.field)))
+    nee.path <- file.path(reg.path, paste0('hourly_flux_GMIS_Toronto_fixed_border_ISA_a_', tolower(SSRD.field)))
     dir.create(nee.path, showWarnings = F, recursive = T)
 
     # ------------------------------------------------------------------------ #

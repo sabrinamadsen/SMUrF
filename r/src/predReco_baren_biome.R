@@ -62,8 +62,7 @@ predReco_biome <- function(reg.name = 'westernCONUS',
                            maxlat = 50,
                            timestr = '20150618',      # in YYYYMMDD, UTC time
                            lc.path,   
-                           lc.pattern,
-                           lc.max.yr,
+                           lc.pattern, 
 
                            TA.path,
                            TA.field = c('daymet', 'ERA5')[1], 
@@ -75,7 +74,6 @@ predReco_biome <- function(reg.name = 'westernCONUS',
                            nn.platform = c('keras', 'neuralnet')[1],
                            ISA.path,
                            ISA.pattern,
-                           isa.max.yr,
                            EVI.path,
                            EVI.pattern,
                            EVI_index,
@@ -113,14 +111,13 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     prep.list <- prep.input4reco(reg.ext, reg.path, reg.name, timestr, 
                                  TA.field, TA.path, TA.varname, 
                                  TS.field, TS.path, TS.varname, 
-                                 lc.path, lc.pattern, lc.max.yr,
-                                 ISA.path, ISA.pattern, isa.max.yr,
+                                 lc.path, lc.pattern, ISA.path, ISA.pattern,
                                  EVI.path, EVI.pattern, EVI_index,
                                  gpp.file) #May need to do ISA separately
-    mean.gpp.rt <- prep.list$init.gpp.stk$GPP_mean  # best-estimated GPP at 0.05deg
+    mean.gpp.rt <- prep.list$init.gpp.stk$GPP_mean  # best-estimated GPP at 500m
     
     #Set GPP to 0 (FOR BARREN RUN ONLY)
-    #mean.gpp.rt<-mean.gpp.rt*0
+    mean.gpp.rt<-mean.gpp.rt*0
 
     # -------------------- Step 2. PREDICT Reco per IGBP -------------------- #
     # call predReco.loopv2() to predict Reco, will return two rasters
@@ -167,31 +164,29 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     
     # ------------ Reduce soil respiration over impervious surfaces ---------- #
     #The code below is from UrbanVPRM.
-    Ra = 0.5*mean.reco.rt #comment out for barren
+    #Ra = 0.5*mean.reco.rt 
     Rh = 0.5*mean.reco.rt #About half of respiration is from soil
-    Ra_err = 0.5*sd.reco.rt #comment out for barren
+    #Ra_err = 0.5*sd.reco.rt
     Rh_err = 0.5*sd.reco.rt
     
     
     Rh[prep.list$isa>0.05] = Rh[prep.list$isa>0.05] * (1-prep.list$isa[prep.list$isa>0.05])
     Rh_err[prep.list$isa>0.05] = Rh_err[prep.list$isa>0.05] * (1-prep.list$isa[prep.list$isa>0.05])
     
-    #UNCOMMENT BELOW TO USE Ra
-    evi.ref <- prep.list$evi[EVI_index]
-    #EVI_scale<-prep.list$evi/evi.ref
-    #EVI_scale[EVI_scale>1]=1
-    #EVI_scale[EVI_scale<0]=0
+    #evi.ref <- prep.list$evi[EVI_index]
+    ##EVI_scale<-prep.list$evi/evi.ref
+    ##EVI_scale[EVI_scale>1]=1
+    ##EVI_scale[EVI_scale<0]=0
     
-    #Assuming no autotrophic respiration
-    #Ra<-Ra*0
-    #Ra_err<- Ra_err*0
+    ##Assuming no autotrophic respiration
+    ##Ra<-Ra*0
+    ##Ra_err<- Ra_err*0
     
-    #With autotrophic respiration:
-    #The VPRM code says Ra should be adjusted as Ra*EVI_scale but the paper says:
-    Ra[prep.list$isa>0.05] = Ra[prep.list$isa>0.05] * (prep.list$evi[prep.list$isa>0.05] +EVI_ref_min*prep.list$isa[prep.list$isa>0.05])/evi.ref
-    Ra_err[prep.list$isa>0.05] = Ra_err[prep.list$isa>0.05] * (prep.list$evi[prep.list$isa>0.05] +EVI_ref_min*prep.list$isa[prep.list$isa>0.05])/evi.ref
+    ##With autotrophic respiration:
+    ##The VPRM code says Ra should be adjusted as Ra*EVI_scale but the paper says:
+    #Ra[prep.list$isa>0.05] = Ra[prep.list$isa>0.05] * (prep.list$evi[prep.list$isa>0.05] +EVI_ref_min*prep.list$isa[prep.list$isa>0.05])/evi.ref
+    #Ra_err[prep.list$isa>0.05] = Ra_err[prep.list$isa>0.05] * (prep.list$evi[prep.list$isa>0.05] +EVI_ref_min*prep.list$isa[prep.list$isa>0.05])/evi.ref
     
-    #End of uncomment for Ra
     
     
     #if(prep.list$isa > 0.05){
@@ -213,8 +208,8 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     #}
     
     # Put the respiration components back together
-    mean.reco.rt = Rh + Ra #CHANGE FOR BARREN RUN!!!
-    sd.reco.rt = Rh_err + Ra_err #CHANGE FOR BARREN RUN!!!
+    mean.reco.rt = Rh
+    sd.reco.rt = Rh_err
     
     # ---------------------- force negative Reco as zero --------------------- #
     # negative Reco occurs due to potential NN extrapolation, DW, 06/18/2019 
@@ -240,7 +235,7 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     zformat <- 'X%Y.%m.%d'
 
     stk.list <- list(mean.reco.rt, sd.reco.rt); names(stk.list) <- varnames
-    reco.fn <- file.path(reco.path, paste0('daily_mean_Reco_uncert_GMIS_Toronto_fixed_border_', reg.name, '_', 
+    reco.fn <- file.path(reco.path, paste0('daily_mean_Reco_uncert_GMIS_Toronto_fixed_border_baren_', reg.name, '_', 
                                            substr(timestr, 1, 8), '.nc'))
 
     save.raster2nc(varnames, varunits, longnames, zformat, stk.list, 

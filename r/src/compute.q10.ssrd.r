@@ -49,6 +49,9 @@ compute.q10.ssrd <- function(TA.path, SSRD.path, timestr, site.ext = NULL,
     SSRD.pj <- raster::projectRaster(SSRD.brk, proj.rt)
     SSRD.pj[SSRD.pj < 0] <- 0
     
+    # For some reason about 30% of the time in Feb 2020 the names are not 
+    # transferred from SSRD.brk to SSRD.pj so I do it manually below.
+    names(SSRD.pj)<-names(SSRD.brk)
 
     # -------------------- Calculate hourly scaling factors ------------------ #
     cat(paste('\ncompute.q10.ssrd(): Calculating Q10, SSRD...\n'))
