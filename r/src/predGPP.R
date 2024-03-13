@@ -82,6 +82,15 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     # prepare MCD12 IGBP land cover
     lc.rt <- prep.mcd12(lc.path, lc.pattern, yr, lc.max.yr, reg.name, reg.ext)
 
+    #UNCOMMENT to set savannas to urban, can use this to just change Fveg file 
+    # and not GPP because savanna Reco not working properly 
+    # (all Savanna Reco==0 in winter months)
+    
+    lc.rt[lc.rt==9] <- 13
+    lc.rt[lc.rt==8] <- 13
+    
+    #End Savanna fix
+    
     # bias.corrTF logical flag, TRUE for performing urban bias correction
     #             according to Zhang et al. (2018), urban SIF may have an 
     #             underestimation of about 14.5%, thus we simply scale up 

@@ -7,7 +7,7 @@ homedir <- 'C:/Users/kitty/Documents/Research/SIF'
 smurf_wd <- file.path(homedir, 'SMUrF'); setwd(smurf_wd)
 source('r/dependencies.r')
 
-imported_raster_aci=raster('C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface/Impermeable_Surface_Area/aci_2018_on.tif')
+imported_raster_aci=raster('C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface/Impermeable_Surface_Area/aci_2021_on.tif')
 
 plot(imported_raster_aci)
 
@@ -24,14 +24,14 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 reg.ext<-extent(minlon, maxlon, minlat, maxlat)
 
 lc.path    <- file.path(smurf_wd, 'data/MCD12Q1')
-lc.pattern <- 'MCD12Q1.006_LC_Type1'
+lc.pattern <- 'MCD12Q1.061_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
-# if no data beyond 2018, use 2018 LC for 2019 and beyond
-lc.max.yr <- 2018  
+# if no data beyond 2022, use 2022 LC for 2023 and beyond
+lc.max.yr <- 2022  
 lc.res    <- 1/24
 
-lc.rt <- prep.mcd12(lc.path, lc.pattern, 2018, lc.max.yr, reg.name, reg.ext)
+lc.rt <- prep.mcd12(lc.path, lc.pattern, 2021, lc.max.yr, reg.name, reg.ext)
 
 p <- as(reg.ext, 'SpatialPolygons')
 crs(p) <- "+proj=longlat +datum=WGS84 +no_defs"
@@ -53,7 +53,7 @@ projection(x) <- aci_crs
 ## give x the same values as ACIcrop
 values(x)<-values(ACIcrop)
 #change values outside the domain and over water to NA
-x[x==0]<--100  
+x[x==0]<- -100  
 x[x==20]<-NA
 
 
@@ -185,10 +185,10 @@ plot(ACI_resample,main='ACI C4 fraction')
 
 #If there is no data
 #ratio.fn <- file.path(smurf_wd, 'data/C4_relative_fraction.tif')
-smurf_C4<-raster("C:/Users/kitty/Documents/Research/SIF/SMUrF/output2018_500m_CSIF_to_TROPOMI_converted_slps/easternCONUS/C4_ratio_easternCONUS.tif")
+smurf_C4<-raster("E:/Research/SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_8day/easternCONUS/C4_ratio_easternCONUS.tif")
 
 ACI_resample[ACI_resample<0]=smurf_C4[ACI_resample<0]
 plot(ACI_resample,main='ACI C4 fraction')
 
-writeRaster(ACI_resample,filename="C:/Users/kitty/Documents/Research/SIF/SMUrF/data/ACI_C4_fraction_GTA_500m.tif",
+writeRaster(ACI_resample,filename="C:/Users/kitty/Documents/Research/SIF/SMUrF/data/ACI_C4_fraction_GTA_500m_2021.tif",
             overwrite=TRUE)

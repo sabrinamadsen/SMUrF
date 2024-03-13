@@ -16,7 +16,7 @@ prep.c4.ratio <- function(smurf_wd, lc.path, lc.pattern, yr, lc.max.yr, reg.name
         # prepare MCD12 IGBP land cover
         lc.rt <- prep.mcd12(lc.path, lc.pattern, yr, lc.max.yr, reg.name, reg.ext)
 
-        ratio.fn <- file.path(smurf_wd, 'data/ACI_C4_fraction_GTA_500m.tif') #C4_relative_fraction.tif')
+        ratio.fn <- file.path(smurf_wd, paste0('data/ACI_C4_fraction_GTA_500m_',yr,'.tif')) #C4_relative_fraction.tif')
         if (!file.exists(ratio.fn)) 
             stop('NO nc file found for C3-C4 ratio..please check repository\n')
         c4.rt <- crop(raster(ratio.fn, varname = 'C4_rel_frac'), extent(lc.rt))

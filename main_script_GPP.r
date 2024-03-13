@@ -45,13 +45,13 @@ source('r/dependencies.r')
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_8day')
+output.path <- file.path(homedir, 'SMUrF/output2021_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_V061_8day')
 
 
 # path for spatial CSIF, Zhang et al., 2018
 #csif.cpath <- file.path(input.path, 'TROPOSIF/2018/8_day/8_day')   # clearsky CSIF
 # path for downscaled TROPOMI SIF filled with downscaled & adjusted CSIF
-csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/2018')   # clearsky CSIF
+csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/V061/2021')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html
@@ -59,11 +59,11 @@ agb.path <- file.path(input.path, 'agb')
 
 # path for 500m IGBP, need to download from https://lpdaacsvc.cr.usgs.gov/appeears/
 lc.path    <- file.path(smurf_wd, 'data/MCD12Q1')
-lc.pattern <- 'MCD12Q1.006_LC_Type1'
+lc.pattern <- 'MCD12Q1.061_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
-# if no data beyond 2018, use 2018 LC for 2019 and beyond
-lc.max.yr <- 2018  
+# if no data beyond 2021, use 2021 LC for 2022 and beyond
+lc.max.yr <- 2021 
 lc.res    <- 1/240     # horizontal grid spacing of land cover in degrees
 
 # raster operations may need temporary disk space for large calculations
@@ -95,7 +95,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #minlon = -90; maxlon = -80; minlat = 35; maxlat = 45
 
 # *** choose yrs, if multiple years, each thred will work on one year
-all.yrs <- seq(2018, 2018)
+all.yrs <- seq(2021,2021)
 
 # ----------------------------------------------------------------------------
 # specify CSIF related parameters
