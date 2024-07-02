@@ -22,7 +22,7 @@ stack.reco <- function(reg.name = 'westernCONUS', reg.path, reco.dir,
              Start aggregating daily mean Reco in a year to one single nc file...\n')
 
         # look for all reco files
-        reco.files <- list.files(reco.path, pattern = paste0('daily_mean_Reco_uncert_GMIS_Toronto_fixed_border_', reg.name), full.names = T)
+        reco.files <- list.files(reco.path, pattern = paste0('daily_mean_Reco_uncert_GMIS_Toronto_', reg.name), full.names = T)
         reco.files <- reco.files[grepl(yyyymm, basename(reco.files))]
         reco.files <- reco.files[basename(reco.files) != basename(fn)]
 

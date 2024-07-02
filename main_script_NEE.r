@@ -23,7 +23,7 @@ source('r/dependencies.r')              # source all functions
 # ---------------------------------------------------------------------------
 # input and output paths
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2020_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_V061_8day')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_oversampled_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_V061_8day')
 #input.path  <- file.path(homedir, 'lin-group7/wde/input_data')
 #output.path <- file.path(homedir, 'lin-group7/wde/output')
 
@@ -51,8 +51,8 @@ minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
 maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 
 # each processor works on each month
-yr <- 2020
-mons <- seq(9,12)
+yr <- 2018
+mons <- seq(5,12)
 #yr <- as.numeric(args[2])
 #mons <- as.numeric(args[3])
 
@@ -60,8 +60,8 @@ mons <- seq(9,12)
 ## paths and variable names for loading hourly Tair and SW rad on surface data
 TA.field   <- 'ERA5'
 SSRD.field <- c('ERA5', 'EPIC')[1]
-TA.path    <- file.path(input.path, TA.field, yr) 
-SSRD.path  <- file.path(input.path, SSRD.field, yr) 
+TA.path    <- file.path(input.path, TA.field, yr,reg.name) 
+SSRD.path  <- file.path(input.path, SSRD.field, yr,'Editted_SSRD') 
 
 # common portions in the filenames before YYYY* for grabbing all available files
 # here are examples of the suitable filenames: 
