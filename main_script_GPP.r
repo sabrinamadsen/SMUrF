@@ -45,13 +45,13 @@ source('r/dependencies.r')
 # ---------------------------------------------------------------------------
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_oversampled_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_V061_8day')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_shore_corr_V061_8day')
 
 
 # path for spatial CSIF, Zhang et al., 2018
 #csif.cpath <- file.path(input.path, 'TROPOSIF/2018/8_day/8_day')   # clearsky CSIF
 # path for downscaled TROPOMI SIF filled with downscaled & adjusted CSIF
-csif.cpath <- file.path(input.path, 'oversampled_CSIF/Oversampled_TROPOMI_CSIF_combined_med/V061/2018')   # clearsky CSIF
+csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/V061/2018')   # clearsky CSIF
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
 # from http://globbiomass.org/wp-content/uploads/GB_Maps/Globbiomass_global_dataset.html

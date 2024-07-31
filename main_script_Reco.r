@@ -36,7 +36,7 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_oversampled_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_V061_8day')
+output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_shore_corr_V061_8day')
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')

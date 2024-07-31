@@ -27,7 +27,15 @@ grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname,
       csif.file <- csif.files[file.timestr >= search.timestr & 
                               file.timestr <= time.info$nhrs.yrdoy]
     } # end if
-
+    
+    #if there is a shoreline-corrected SIF use that
+    if(length(csif.file)>1){
+      csif.file <- csif.file[grepl('shore_weighted_corr',csif.file)]
+      print(paste0('using shore corrected SIF: ',csif.file))
+    }else{
+      print(paste0('No shore correction availabel, ',csif.file))
+    }
+    
     if (length(csif.file) == 0) {
         cat(paste('grab.csif(): No CSIF file found for', search.timestr, 
                   ', please check...\n')); return()
