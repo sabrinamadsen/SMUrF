@@ -36,18 +36,30 @@ source('r/dependencies.r')              # source all functions
 # Paths one needs to modify 
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
+
 output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_shore_corr_V061_8day')
+
+
+
 
 ## path for the updated 500m IGBP generated from main_script_GPP.r
 lc.path <- file.path(smurf_wd, 'data/MCD12Q1')
 lc.pattern <- 'MCD12Q1.061_LC_Type1'
-lc.max.yr<-2018
+
+
+
+lc.max.yr<-2021
+
 #tmpdir <- '/scratch/local/u0947337'  # raster operation may need temporary disk space
 tmpdir <- 'C:/Users/kitty/AppData/Local/Temp/R' #NA
 
 ISA.path <- 'C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface'
 ISA.pattern <- 'GMIS_Toronto_ACI_SOLRIS_'
-isa.max.yr<-2018
+
+
+
+isa.max.yr<-2021
+
 
 # ---------------------------------------------------------------------------
 # Variables one needs to modify 
@@ -75,8 +87,8 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #yr  <- args[2]    # get year string from python code, YYYY e.g., '2018'
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
-yr <- '2018'
-mon <- '12'
+yr <- '2021'
+mon <- '01'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
                                formatC(lubridate::days_in_month(start.date),
@@ -122,16 +134,28 @@ TS.path <- ifelse(TS.field == 'NLDAS', nldas.path, era5.path)
 
 
 EVI.path <- input.path
+
 EVI.pattern <- 'MODIS_V061_EVI_2018_qc_extended'
 
 if (length(grep(EVI.pattern,list.files(EVI.path)))==0){
     print("Process MODIS EVI data")
     mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/dataverse_files/MODIS_reflectance/MODIS_V061_GTA_AppEEARS_2018'
+
+
+
+
+
+
+
     mod_EVI(mod_dir,yr,minlon,maxlon,minlat,maxlat,reg.name,lc.path,lc.pattern,lc.max.yr,EVI.path,EVI.pattern)
 }
 
 EVI_index <- 132707
+
 EVI_ref_min <- raster(paste0(EVI.path,'/',EVI.pattern,'.tif'),band=49)[EVI_index] 
+
+
+
 # For V061: The lowest value at the reference pixel occurs on day 49 (February) for 2018
 # For V061: The lowest value at the reference pixel occurs on day 50 (February) for 2019
 # For V061: The lowest value at the reference pixel occurs on day 5 (January) for 2020

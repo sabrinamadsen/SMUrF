@@ -240,7 +240,11 @@ predReco_biome <- function(reg.name = 'westernCONUS',
     zformat <- 'X%Y.%m.%d'
 
     stk.list <- list(mean.reco.rt, sd.reco.rt); names(stk.list) <- varnames
+
     reco.fn <- file.path(reco.path, paste0('daily_mean_Reco_uncert_GMIS_Toronto_', reg.name, '_', 
+
+
+
                                            substr(timestr, 1, 8), '.nc'))
 
     save.raster2nc(varnames, varunits, longnames, zformat, stk.list, 
