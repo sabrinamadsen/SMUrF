@@ -33,7 +33,7 @@ grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname,
       csif.file <- csif.file[grepl('shore_weighted_corr',csif.file)]
       print(paste0('using shore corrected SIF: ',csif.file))
     }else{
-      print(paste0('No shore correction availabel, ',csif.file))
+      print(paste0('No shore correction available, ',csif.file))
     }
     
     if (length(csif.file) == 0) {

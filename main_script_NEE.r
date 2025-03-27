@@ -101,6 +101,12 @@ message(jobname)
 #stop()
 
 # ----------------------------------------------------------------------------
+# downscale Reco and GPP standard deviation
+# ----------------------------------------------------------------------------
+
+downscale_sd <- TRUE
+
+# ----------------------------------------------------------------------------
 # Start running and storing hourly fluxes in nc files (by months)
 # ----------------------------------------------------------------------------
 message('\n\nInitializing hourly NEE estimates')
@@ -108,7 +114,7 @@ message('Number of parallel threads: ', n_nodes * n_cores)
 all.yyyymm <- paste0(yr, formatC(mons, width = 2, flag = 0))
 smurf_apply(FUN = predNEE, slurm, slurm_options, n_nodes, n_cores, jobname, 
             reg.name, reg.path, reco.dir, yyyymm = all.yyyymm, TA.path, TA.field, 
-            TA.varname, SSRD.path, SSRD.field, SSRD.varname, smurf_wd)
+            TA.varname, SSRD.path, SSRD.field, SSRD.varname, downscale_sd, smurf_wd)
 
 q('no')
 # end of script

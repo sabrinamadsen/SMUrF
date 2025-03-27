@@ -45,14 +45,17 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
     b03_file <- stack(b03_files[i])
 
     qc_file <- stack(qc_files[i])#+1])#+2])
+    #Reproject the reflectance data to the land cover data
     file1<-raster::projectRaster(b01_file, lc.rt)#proj.rt)
     file2<-raster::projectRaster(b02_file, lc.rt)#proj.rt)
     file3<-raster::projectRaster(b03_file, lc.rt)# proj.rt)
-    qcfile <- raster::projectRaster(qc_file,lc.rt)
+    qc_file <- raster::projectRaster(qc_file,lc.rt)
+    #crop the qc files to have the same extent as reflectance bands
+    #qcfile <- crop(qcfile,reg.ext) 
 
     # APPLY SCALE FACTOR FOR 2018 BUT NOT FOR 2020 (THE DATA ON APPEEARS CHANGED)
     ## apply scale factors for reflectance data in the bands needed for EVI/LSWI calculation
-    if (yr==2018){
+    if (y==2018){
       file1 <- file1 * 0.0001 #red
       file2 <- file2 * 0.0001 #NIR
       file3 <- file3 * 0.0001 #blue

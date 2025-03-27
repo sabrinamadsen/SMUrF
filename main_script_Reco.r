@@ -37,6 +37,7 @@ source('r/dependencies.r')              # source all functions
 # ---------------------------------------------------------------------------
 input.path  <- file.path(homedir, 'SMUrF/data')
 
+#Output path should be the same as output for GPP
 output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_shore_corr_V061_8day')
 
 
@@ -87,7 +88,7 @@ maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
 #yr  <- args[2]    # get year string from python code, YYYY e.g., '2018'
 #mon <- args[3]    # get month from python code, MM, e.g., '01'
 
-yr <- '2021'
+yr <- '2018'
 mon <- '01'
 start.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), '01'), '%Y%m%d')
 end.date <- as.Date(paste0(yr, formatC(mon, width = 2, flag = 0), 
@@ -137,15 +138,11 @@ EVI.path <- input.path
 
 EVI.pattern <- 'MODIS_V061_EVI_2018_qc_extended'
 
+# If the EVI data has not yet been calculated from the MODIS reflectance data
+# this if statement will process it (including removing bad quality flag values)
 if (length(grep(EVI.pattern,list.files(EVI.path)))==0){
     print("Process MODIS EVI data")
     mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/dataverse_files/MODIS_reflectance/MODIS_V061_GTA_AppEEARS_2018'
-
-
-
-
-
-
 
     mod_EVI(mod_dir,yr,minlon,maxlon,minlat,maxlat,reg.name,lc.path,lc.pattern,lc.max.yr,EVI.path,EVI.pattern)
 }
