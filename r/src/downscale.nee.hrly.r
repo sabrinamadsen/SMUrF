@@ -1,9 +1,11 @@
 #' subroutine to temporally downscale NEE using Tair and SW
 #' and spatially downscale using VCF from MOD44B
 #' @author Dien Wu, 08/09/2019 
+#' updated by @author Sabrina Madsen-Colford, 03/27/2025
 
 #' 12/23/2019, DW, instead of using daily mean ssrd to normalize hourly ssrd, 
 #'                 use 4day mean ssrd to match the 4day mean GPP
+#' 03/27/2025, SM, added option to downscale uncertainty to hourly resolution
 
 downscale.nee.hrly <- function(timestr, gpp.file, reco.file, TA.path, TA.field, 
                                TA.varname, SSRD.path, 
@@ -22,11 +24,10 @@ downscale.nee.hrly <- function(timestr, gpp.file, reco.file, TA.path, TA.field,
     mean.reco.rt <- reco.stk$Reco_mean; sd.reco.rt <- reco.stk$Reco_sd
 
     #The resolution is off by 3x10^-9 deg. this is causing problems.
-    #Mannually set GPP sd to Reco sd resolution:
+    # SM, Mannually set GPP sd to Reco sd resolution 03/27/2025
     res(sd.gpp.rt) <- res(sd.reco.rt)
     
     # site extent will be determined by the overlapped region between GPP and Reco
-    # extent(gpp) >= extent(reco.rt), so crop GPP based on RECO, to match RECO
     mean.gpp.int <- raster::intersect(mean.gpp.rt, mean.reco.rt)
     sd.gpp.int <- raster::intersect(sd.gpp.rt, sd.reco.rt)
     site.ext <- extent(mean.gpp.int)
@@ -64,11 +65,12 @@ downscale.nee.hrly <- function(timestr, gpp.file, reco.file, TA.path, TA.field,
     mean.nee.stk <- mean.reco.stk - mean.gpp.stk
     names(mean.nee.stk) <- names(mean.reco.stk)
     
+    # SM, downscale uncertainty to hourly resolution. 03/27/2025
     if (downscale_sd == TRUE){
       sd.reco.stk <- sd.reco.rt * tscale; names(sd.reco.stk) <- names(tscale)
       sd.gpp.stk  <- sd.gpp.int * iscale; names(sd.gpp.stk)  <- names(iscale)
       
-      # compute hourly NEE sd from GPP and Reco 
+      # compute hourly NEE sd from GPP and Reco using error propagation
       sd.nee.stk <- (sd.reco.stk^2 + sd.gpp.stk^2)^(1/2)
       names(sd.nee.stk) <- names(sd.reco.stk)
       

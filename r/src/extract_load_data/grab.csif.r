@@ -1,5 +1,6 @@
 # subroutine to grab CSIF from Zhang et al., 2018, BG
 # by Dien Wu, 12/21/2018
+#' updated by @author: Sabrina Madsen-Colford, 07/11/2022
 
 # timestr in form of YYYYMMDDHH
 # ext: generated from raster::extent(), e.g., minlon, maxlon, minlat, maxlat
@@ -28,7 +29,7 @@ grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname,
                               file.timestr <= time.info$nhrs.yrdoy]
     } # end if
     
-    #if there is a shoreline-corrected SIF use that
+    # SM: if there is a shoreline-corrected SIF use that, 10/23/2024
     if(length(csif.file)>1){
       csif.file <- csif.file[grepl('shore_weighted_corr',csif.file)]
       print(paste0('using shore corrected SIF: ',csif.file))
@@ -37,16 +38,16 @@ grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname,
     }
     
     if (length(csif.file) == 0) {
-        cat(paste('grab.csif(): No CSIF file found for', search.timestr, 
+        cat(paste('grab.csif(): No SIF file found for', search.timestr, 
                   ', please check...\n')); return()
 
     } else {
       
-      # grab and crop CSIF according to 'var'
+      # grab and crop SIF according to 'var'
       sel.csif <- crop(stack(csif.file, varname = var), ext)
       if (nlayers(sel.csif) > 1) sel.csif <- mean(sel.csif)
       
-      #Also grab and crop temperature data
+      # SM: Also grab and crop temperature data 07/11/2022
       # Load hourly TA (deg C) and incoming SW from ERA5
       # use nhrs = 23 to grab all hourly variables in a day 
       
@@ -57,8 +58,9 @@ grab.csif <- function(csif.path, timestr, sif.temp, TA.path, TA.varname,
       # find the start time of the 4-day interval that "timestr" fall into 
       find.timestr <- timestr4[findInterval(time.info$find.timestr, timestr4)]
       
-      #If it is outside of the growing season set SIF to 0
-      if ((search.timestr-yr2*1000)<90 | (search.timestr-yr2*1000)>340){     # hourly air temp in UTC
+      # SM: If it is outside of the growing season set SIF to 0, 10/07/2022
+      # NOTE THIS WILL NEED TO BE CHANGED OUTSIDE OF THE GTA!!!
+      if ((search.timestr-yr2*1000)<90 | (search.timestr-yr2*1000)>340){    
         sel.csif<-sel.csif*0
       }else if (sif.temp==TRUE) {     # hourly air temp in UTC
         TA.brk <- prep.era5(TA.path, TA.varname, timestr = find.timestr, 

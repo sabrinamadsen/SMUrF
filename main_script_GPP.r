@@ -1,14 +1,17 @@
 memory.limit(size=5e5)
-#HELLO
 #' Main script to generate daily mean SIF-based GPP for each yr
 #' grab spatial SIF, assign GPP-SIF slopes with gap filling for urban core
 
 #' @author: Dien Wu, 04/19/2019
 #' last update, 03/28/2020
 #' ---------------------------------------------------------------------------
+#' 
+#' #' @author: Sabrina Madsen, 09/28/2021
+#' last update, 03/27/2025
+#' ---------------------------------------------------------------------------
 
 #' @datasets required include: 
-#' 1. OCO-2 SIF and 0.05 degree CSIF
+#' 1. 8-day resolution downscaled TROPOMI SIF 
 #' 2. MODIS land cover (500m MCD12) downloaded from AρρEEARS which reforms MODIS 
 #'    product to desired format,  https://lpdaacsvc.cr.usgs.gov/appeears/
 #'    This link requires shapefiles for target region, which can be generated 
@@ -34,6 +37,22 @@ memory.limit(size=5e5)
 #' 03/29/2020, update urban gap-fill and incorporate C3-C4 partitioning
 #' 04/07/2020, use GPP-CSIF slopes based on GPP in units of umol m-2 s-1
 #' ---------------------------------------------------------------------------
+#' 
+#' @updates by SM:
+#' 03/12/2021: Added line to fix incorrect calling of layers in prep.slp.agb.r
+#' 09/28/2021: Adjusted code to use downscaled TROPOMI SIF instead at 500m x 
+#'             500m resolution 
+#' 11/29/2021: Removed CSIF urban bias correction
+#' 07/11/2022: Added option to limit photosynthesis to when temperatures > 0C
+#' 10/07/2022: Adjusted to use ACI C3:C4 fraction in Canada 
+#'             (See ACI_C3C4_fraction.r)
+#' 10/07/2022: Limited SIF to growing season only (see grab.csif.r )
+#'             NOTE: THIS NEEDS TO BE CHANGED OUTSIDE OF THE TORONTO REGION!
+#' 10/07/2022: Adjusted code to use downscaled, CSIF-filled, TROPOMI SIF
+#' 03/13/2024: Added savanna fix to GPP
+#' 10/23/2024: Use shoreline corrected SIF where possible 
+#'             (see Toronto_tree_analysis.r to generate correction)
+#'
 
 # source all functions and load all libraries
 homedir <- 'C:/Users/kitty/Documents/Research/SIF'
@@ -46,19 +65,10 @@ source('r/dependencies.r')
 # input: e.g., OCO-2, spatial SIF, above ground biomass
 input.path  <- file.path(homedir, 'SMUrF/data')
 
-output.path <- file.path(homedir, 'SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_shore_corr_V061_8day')
+output.path <- file.path(homedir, 'SMUrF/output2018_Ottawa_500m_TROPOMI_CSIF_impervious_R_shore_corr_V061_no_adjust_8day')
 
-
-
-
-
-# path for spatial CSIF, Zhang et al., 2018
-#csif.cpath <- file.path(input.path, 'TROPOSIF/2018/8_day/8_day')   # clearsky CSIF
 # path for downscaled TROPOMI SIF filled with downscaled & adjusted CSIF
-
-csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/V061/2018')   # clearsky CSIF
-
-
+csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/V061/Montreal_Ottawa/2018/fixed2')   
 
 
 # path for 100m AGB from GlobBiomass, need to download 40x40deg tiles of data
@@ -66,20 +76,18 @@ csif.cpath <- file.path(input.path, 'downscaled_CSIF/TROPOMI_CSIF_combined_med/V
 agb.path <- file.path(input.path, 'agb')
 
 # path for 500m IGBP, need to download from https://lpdaacsvc.cr.usgs.gov/appeears/
-lc.path    <- file.path(smurf_wd, 'data/MCD12Q1')
+lc.path    <- file.path(smurf_wd, 'data/MCD12Q1/Montreal_Ottawa')
 lc.pattern <- 'MCD12Q1.061_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
 # if no data beyond 2021, use 2021 LC for 2022 and beyond
 
 
-
-lc.max.yr <- 2021 
+lc.max.yr <- 2023
 
 lc.res    <- 1/240     # horizontal grid spacing of land cover in degrees
 
 # raster operations may need temporary disk space for large calculations
-#tmpdir <- '/scratch/local/u0947337'
 tmpdir <- 'C:/Users/kitty/AppData/Local/Temp/R'
 
 # ---------------------------------------------------------------------------
@@ -100,17 +108,20 @@ dir.create(gpp.path, recursive = T, showWarnings = F)
 #' (minlon, maxlon, minlat, laxlat) that matches above @param reg.name
 #' these lat/lon should follow the order of @param reg.name
 # *** too large a spatial extent may lead to memory issue, DONT DO ENTIRE GLOBE
-minlon <- c(-125, -80.9,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -78.3,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
-#minlon = -90; maxlon = -80; minlat = 35; maxlat = 45
+
+# Southern Ontario: -80.9, -78.3, 42.4, 44.7
+# Montreal/Ottawa: -76.2, -72.7, 44.5, 46.4
+# Just Greater Montreal: -74.4, -72.9, 45.1, 46.1
+# Just Canadian Capitol Region (Ottawa/Gatineau): -76.5, -75.1, 44.8, 46
+#minlon <- c(-125, -80.9,  -11, 100,  130, 125, -65, -10)[indx]
+#maxlon <- c( -95, -78.3,   20, 125,  155, 150, -40,  20)[indx]
+#minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
+#maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
+minlon = -80.9; maxlon = -78.3; minlat = 42.4; maxlat = 44.7
 
 # *** choose yrs, if multiple years, each thred will work on one year
 
 all.yrs <- seq(2018,2018)
-
-
 
 
 # ----------------------------------------------------------------------------
@@ -119,11 +130,11 @@ all.yrs <- seq(2018,2018)
 sif.prod <- 'CSIFclear'
 sif.var  <- 'daily_sif'
 sif.nd   <- 8         # temporal resoultion, every 4 or 8 days
-sif.res  <- 1/240 #0.004166667 #0.00449167 #500*180/(6.378*10**6*pi) # 0.05 deg res
-sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero *** MAYBE CHANGE ***
+sif.res  <- 1/240 #0.004166667 # 500m resolution
+sif.rmTF <- TRUE      # if TRUE, force negative SIF values as zero 
 sif.path <- csif.cpath 
 
-sif.temp <- TRUE  # if TRUE, force SIF values to zero if the average temperature is below 0C MAYBE USE MAX TEMP INSTEAD?
+sif.temp <- TRUE  # if TRUE, force SIF values to zero if the average temperature is below 0C
 TA.field   <- 'ERA5'
 TA.path    <- file.path(input.path, TA.field, all.yrs) 
 TA.varname <- '2T'
@@ -153,11 +164,12 @@ jobname <- paste0('SMUrF_GPP_', reg.name)
 cat('Preparing 100 m AGB and 500 m C3-C4 ratio before submitting jobs...\n')
 agb.file <- grab.agb.GlobBiomass(agb.path, minlon, maxlon, minlat, maxlat) 
 
+ratio.pattern <- 'Montreal_Ottawa'
 # load 10 km x 10 km C3-C4 ratio using pre-processed nc file, DW, 03/29/2020
 # project 10 km ratios to 500 m that matches MCD12
 ratio.file <- prep.c4.ratio(smurf_wd, lc.path, lc.pattern, yr = all.yrs[1], 
                             lc.max.yr, reg.name, minlon, maxlon, minlat, maxlat, 
-                            gpp.path)
+                            gpp.path,ratio.pattern)
 
 # ----------------------------------------------------------------------------
 # Start running SIF-based GPP model 

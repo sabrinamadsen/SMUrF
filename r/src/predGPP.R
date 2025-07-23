@@ -1,5 +1,6 @@
 #' subroutine to estimate GPP
 #' @author Dien Wu, 07/03/2019, latest modification on 03/28/2020
+#' updated by @author: Sabrina Madsen-Colford, 11/29/2021
 
 # ---------------------------------------------------------------------------- #
 #' @param reg.name character string without any space for region name, e.g., 'westernCONUS'
@@ -82,15 +83,18 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     # prepare MCD12 IGBP land cover
     lc.rt <- prep.mcd12(lc.path, lc.pattern, yr, lc.max.yr, reg.name, reg.ext)
 
-    #UNCOMMENT to set savannas to urban, can use this to just change Fveg file 
-    # and not GPP because savanna Reco not working properly 
-    # (all Savanna Reco==0 in winter months)
+    # SM: replaced Savanna land cover with urban agb-based land cover, 
+    #     03/13/2024 
+    # UNCOMMENT to set savannas to urban
+    # (all Savanna Reco was negative in winter months)
     
     lc.rt[lc.rt==9] <- 13
     lc.rt[lc.rt==8] <- 13
     
     #End Savanna fix
     
+    # SM: removed CSIF urban bias correction, not needed when using TROPOMI SIF
+    #     11/29/2021
     # bias.corrTF logical flag, TRUE for performing urban bias correction
     #             according to Zhang et al. (2018), urban SIF may have an 
     #             underestimation of about 14.5%, thus we simply scale up 
@@ -122,13 +126,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     ## loop over every 4 days in a particular yr
     gpp.mean.stk <- gpp.sd.stk <- sif.stk <- NULL    # initialize
     looplength<-length(all.timestr) #include -6 in 2018 and -2 in 2019 (missing Dec files)
-    for (tt in 1 : looplength) { #winter=0 and 4-day resolution
-    #for (tt in 15 : looplength) { #for 4-day res 
-    #for (tt in 5 : looplength){ #for 8-day res
-    #for (tt in 2 : looplength) { # for 2019, only missing first few
-        #start at 16 to avoid missing data at beginning of year
-        #end 6 before the end of the year to avoid missing data
-        #tt<-21
+    for (tt in 1 : looplength) { #winter=0 and 8-day resolution
         timestr <- all.timestr[tt]
         if (tt %% 5 == 0) cat(paste('\n# ---- Working on date:', timestr, ';', 
                                     signif(tt / looplength) * 100, 
@@ -138,11 +136,10 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
         ## grab two spatial SIF, they can be negative
         if (grepl('CSIF', sif.prod)) 
             sif.rt <- grab.csif(sif.path, timestr, sif.temp, TA.path, TA.varname, ext = reg.ext, var = sif.var,yr=yr) 
-            #sif.rt <- grab.tsif(sif.path, timestr, minlon, maxlon, minlat, maxlat)
         
         if (is.null(sif.rt)) stop(paste('predGPP(): No SIF file found for', 
                                   substr(timestr, 1, 8), 'Please check...\n'))
-        if (sif.rmTF) sif.rt[sif.rt < 0] <- 0     # force negative CSIF to zero
+        if (sif.rmTF) sif.rt[sif.rt < 0] <- 0     # force negative SIF to zero
 
         # ---------------------- 2.2 Compute gridded GPP -------------------- #
         # compute GPP with unit conversion to umol/m2/s, by calling compute.gpp()
@@ -189,7 +186,7 @@ predGPP <- function(reg.name = 'westernCONUS',  # character
     zformat <- 'X%Y.%m.%d'
 
     # assign correct layer names 
-    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[0:46]#15:92]#[5:46]#[15:92]#[2:90]#[16:86]
+    names(sif.stk) <- names(gpp.mean.stk) <- names(gpp.sd.stk) <- all.date[0:46]
     #take only dates that were used in loop above
     
     # order of this list should match all variables above e.g., varnames
