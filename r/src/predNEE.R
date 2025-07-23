@@ -1,6 +1,7 @@
 #' predNEE: script to downscale daily GPP and RECO to hrly NEE
 #' this subroutine stores hourly NEE in a single day as tif files
 #' @author: Dien Wu, 07/17/2019 
+#' updated by @author Sabrina Madsen-Colford, 09/28/2021
 
 #' @param reg.name reg.name name, e.g., 'SaltLakeCity', without any space
 #' @param reg.path path that stores GPP and NEE
@@ -60,12 +61,12 @@ predNEE <- function(reg.name = 'westernCONUS',
     reco.stk <- stack(reco.file, varname = 'Reco_mean')
     #all.dates <- as.POSIXct(as.numeric(gsub('X', '', names(reco.stk))), 
     #                        origin = '1970-01-01 00:00:00', tz = 'UTC')
-    # NOTE: I REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
+    # SM, REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
     all.dates <- as.POSIXct(gsub('\\.','/',gsub('X', '', names(reco.stk))), 
                             origin = '1970-01-01 00:00:00', tz = 'UTC')
     all.timestr <- paste0(format(all.dates, format = '%Y%m%d'), '00')
 
-    nee.path <- file.path(reg.path, paste0('hourly_flux_GMIS_Toronto_fixed_border_ISA_a_w_sd_', tolower(SSRD.field)))
+    nee.path <- file.path(reg.path, paste0('hourly_flux_GMIS_combined_ISA_a_w_sd_', tolower(SSRD.field)))
     dir.create(nee.path, showWarnings = F, recursive = T)
 
     # ------------------------------------------------------------------------ #
@@ -155,8 +156,8 @@ predNEE <- function(reg.name = 'westernCONUS',
       save.raster2nc(varnames, varunits, longnames, zformat, stk.list, filename = nee.fn)
     }
 
-    ## call save.raster2nc for storing multiple rasterStacks into one nc file
-    #save.raster2nc(varnames, varunits, longnames, zformat, stk.list, filename = nee.fn)
+     
+    removeTmpFiles(h=0.25) #remove temporary files older than 15 minutes
     
     return(nee.fn)  # return filename 
   })  # end of try()

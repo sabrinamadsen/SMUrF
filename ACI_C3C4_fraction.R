@@ -7,9 +7,11 @@ homedir <- 'C:/Users/kitty/Documents/Research/SIF'
 smurf_wd <- file.path(homedir, 'SMUrF'); setwd(smurf_wd)
 source('r/dependencies.r')
 
-imported_raster_aci=raster('C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/UrbanVPRM/Impermeable_Surface/Impermeable_Surface_Area/aci_2021_on.tif')
+imported_raster_aci=raster('E:/Research/Impermeable_Surface_data/ACI/aci_2018_qc_v3.tif')
+imported_raster_aci2=raster('E:/Research/Impermeable_Surface_data/ACI/aci_2018_on_v3.tif')
 
 plot(imported_raster_aci)
+plot(imported_raster_aci2)
 
 aci_crs = '+proj=aea +lat_0=40 +lon_0=-96 +lat_1=44.75 +lat_2=55.75 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
 
@@ -17,48 +19,57 @@ indx<-2
 reg.name <- c('westernCONUS', 'easternCONUS',     'westernEurope', 
               'easternChina', 'easternAustralia', 'easternAsia', 
               'southAmerica', 'centralAfrica')[indx]
-minlon <- c(-125, -80.9,  -11, 100,  130, 125, -65, -10)[indx]
-maxlon <- c( -95, -78.3,   20, 125,  155, 150, -40,  20)[indx]
-minlat <- c(  25,  42.4,   35,  20,  -40,  30, -40, -10)[indx]
-maxlat <- c(  50,  44.7,   60,  50,  -10,  55, -10,  15)[indx]
+
+# Southern Ontario: -80.9, -78.3, 42.4, 44.7
+
+minlon <- c(-125, -76.5,  -11, 100,  130, 125, -65, -10)[indx]
+maxlon <- c( -95, -72.7,   20, 125,  155, 150, -40,  20)[indx]
+minlat <- c(  25,  44.5,   35,  20,  -40,  30, -40, -10)[indx]
+maxlat <- c(  50,  46.4,   60,  50,  -10,  55, -10,  15)[indx]
 reg.ext<-extent(minlon, maxlon, minlat, maxlat)
 
-lc.path    <- file.path(smurf_wd, 'data/MCD12Q1')
+lc.path    <- file.path(smurf_wd, 'data/MCD12Q1/Montreal_Ottawa')
 lc.pattern <- 'MCD12Q1.061_LC_Type1'
 
 # indicate the latest year available of MCD12Q1
 # if no data beyond 2022, use 2022 LC for 2023 and beyond
-lc.max.yr <- 2022  
+lc.max.yr <- 2018  
 lc.res    <- 1/24
 
-lc.rt <- prep.mcd12(lc.path, lc.pattern, 2021, lc.max.yr, reg.name, reg.ext)
+lc.rt <- prep.mcd12(lc.path, lc.pattern, 2018, lc.max.yr, reg.name, reg.ext)
 
 p <- as(reg.ext, 'SpatialPolygons')
 crs(p) <- "+proj=longlat +datum=WGS84 +no_defs"
 bound_box_aci<-spTransform(p,aci_crs)
 
 ACIcrop <-crop(imported_raster_aci,bound_box_aci)
+ACIcrop2 <-crop(imported_raster_aci2,bound_box_aci)
+
+
+merged_raster <- mosaic(ACIcrop,ACIcrop2,fun=max)
 
 #create a raster
 x <-raster()
 #set the number of columns, rows, and extent
 # 2km res x <- raster(ncol=210, nrow=170, xmn=1270260, xmx=1275360, ymn=611160, ymx=617460)
-x <- raster(ncol=8696, nrow=9822, xmn=1188780, xmx=1449660, ymn=390210, ymx=684870)
+#x <- raster(ncol=8696, nrow=9822, xmn=1188780, xmx=1449660, ymn=390210, ymx=684870) #For S. Ontario
+x <- raster(ncol=ncol(merged_raster), nrow=nrow(merged_raster), xmn=xmin(merged_raster), xmx=xmax(merged_raster), ymn=ymin(merged_raster), ymx=ymax(merged_raster)) #For Montreal/Ottawa
 res(x)
-##check the number of cells is 85412112
-ncell(x)
+## check the number of cells is 85412112 for S. Ontario
+## check the number of cells is 100342422 for Montreal/Ottawa region
+ncell(x) == ncell(merged_raster)
 
 # set the coordinate reference system (CRS) (define the projection)
 projection(x) <- aci_crs
-## give x the same values as ACIcrop
-values(x)<-values(ACIcrop)
-#change values outside the domain and over water to NA
+## give x the same values as ACIcrop/merged raster
+values(x)<-values(merged_raster)
+#change values outside the domain to -100 and NA over water
 x[x==0]<- -100  
-x[x==20]<-NA
+x[x==20]<- 0
 
 
 ACI_LC=x
-rm(x, ACIcrop)
+rm(x, ACIcrop, ACIcrop2, merged_raster)
 #ACI_LC[x==20]=0 #Water -> 0
 #ACI_LC[x==30]=0 #Exposed/Baren -> 0
 
@@ -167,28 +178,51 @@ ACI_LC[ACI_LC==147]=1 #Corn is C4 -> 1
 
 ACI_LC[ACI_LC>2]=0
 
-par(mar=c(3,3,3,0))
-plot(ACI_LC, main='ACI C4 Plants')
+#par(mar=c(3,3,3,0))
+#plot(ACI_LC, main='ACI C4 Plants')
 
 ACI_C4_proj<-projectRaster(ACI_LC, crs='+proj=longlat +datum=WGS84 +no_defs', method='ngb')
-par(mar=c(3,3,3,0))
-plot(ACI_C4_proj, main='ACI C4 fraction (proj=WGS84)')
+#par(mar=c(3,3,3,0))
+#plot(ACI_C4_proj, main='ACI C4 fraction (proj=WGS84)')
 
 ACI_C4_crop<-crop(ACI_C4_proj, p, method='ngb')
-par(mar=c(3,3,3,0))
-plot(ACI_C4_crop, main='ACI C4 fraction cropped')
+#par(mar=c(3,3,3,0))
+#plot(ACI_C4_crop, main='ACI C4 fraction cropped')
 
 
 ACI_resample<-resample(ACI_C4_crop,lc.rt)
-plot(ACI_resample,main='ACI C4 fraction')
+#plot(ACI_resample,main='ACI C4 fraction')
 
 
 #If there is no data
-#ratio.fn <- file.path(smurf_wd, 'data/C4_relative_fraction.tif')
-smurf_C4<-raster("E:/Research/SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_8day/easternCONUS/C4_ratio_easternCONUS.tif")
+ratio.fn <- file.path(smurf_wd, 'data/C4_relative_fraction.tif')
+SPAM_C4 <- raster(ratio.fn)
+SPAM_C4_crop <- crop(SPAM_C4,p,method='ngb')
+SPAM_C4_resample <- resample(SPAM_C4_crop,lc.rt,method='ngb')
 
-ACI_resample[ACI_resample<0]=smurf_C4[ACI_resample<0]
-plot(ACI_resample,main='ACI C4 fraction')
+##smurf_C4<-raster("E:/Research/SMUrF/output2018_500m_CSIF_to_TROPOMI_CSIF_ALL_converted_slps_temp_impervious_R_8day/easternCONUS/C4_ratio_easternCONUS.tif")
 
-writeRaster(ACI_resample,filename="C:/Users/kitty/Documents/Research/SIF/SMUrF/data/ACI_C4_fraction_GTA_500m_2021.tif",
+
+
+SPAM_US_crops <- SPAM_C4_resample
+SPAM_US_crops[(ACI_resample>=0)]<-NA #Isolate only the areas in the US (where ACI does not exist)
+SPAM_US_crops[(lc.rt!=12) & (lc.rt!=13)]<-NA #isolate only areas defined by MODIS as crops
+
+# Calculate the average C3:C4 ratio in the region (in the US only since this is
+# where the filling occurs)
+SPAM_US_mean_C4_ratio <- mean(values(SPAM_US_crops),na.rm=T)
+
+
+ACI_resample[ACI_resample< 0]=SPAM_C4_resample[ACI_resample< 0]
+ACI_resample[is.na(ACI_resample)]=SPAM_C4_resample[is.na(ACI_resample)]
+
+
+## If there are areas over croplands that are NA (due to coarser resolution of SPAM)
+## set them to the average C3:C4 ratio in the region (in the US)
+ACI_resample_filled <- ACI_resample
+ACI_resample_filled[is.na(ACI_resample) & ((lc.rt==12) | (lc.rt==14))] <- SPAM_US_mean_C4_ratio
+plot(ACI_resample_filled,main='ACI & SPAM C4 fraction')
+
+
+writeRaster(ACI_resample_filled,filename="C:/Users/kitty/Documents/Research/SIF/SMUrF/data/ACI_C4_fraction_Montreal_Ottawa_500m_2018.tif",
             overwrite=TRUE)

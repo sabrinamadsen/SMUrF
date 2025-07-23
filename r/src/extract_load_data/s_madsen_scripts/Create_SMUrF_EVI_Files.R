@@ -17,26 +17,27 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
                     evi.path,
                     evi.pattern
                     ){
-  setwd(mod_dir) # landsat data in /urbanVPRM_30m/driver_data/landsat/
+  setwd(mod_dir)
   mod_files <- list.files()
   b01_files <- mod_files[grep('b01',mod_files)]
   b02_files <- mod_files[grep('b02',mod_files)]
   b03_files <- mod_files[grep('b03',mod_files)]
-  #b07_files <- mod_files[grep('b07',mod_files)]
   qc_files <- mod_files[grep('qc_500m_doy',mod_files)]
   
+  #import land cover
+  reg.ext <- raster::extent(minlon, maxlon, minlat, maxlat) # regional extent
+  lc.rt <- prep.mcd12(lc.path, lc.pattern, y, lc.max.yr, reg.name, reg.ext)
   
   ##create a raster
   EVI_raster_V061 <-raster()
-  ##set the number of columns, rows, and extent NEED TO CHANGE DEPENDING ON SITE
-  EVI_raster_V061 <- brick(ncol=624, nrow=552, xmn=minlon, xmx=maxlon, ymn=minlat, ymx=maxlat,nl=380)
+  ##set the number of columns, rows, and extent
+  EVI_raster_V061 <- brick(ncol=ncol(lc.rt), nrow=nrow(lc.rt), xmn=minlon, xmx=maxlon, ymn=minlat, ymx=maxlat,nl=380)
   res(EVI_raster_V061)
-  ##check the number of cells is 344448 for the GTA
+  ##check the number of cells is 344448 for the GTA, 383040 for Montreal/Ottawa
   ncell(EVI_raster_V061)
   names(EVI_raster_V061)<-paste('DOY',-3:376,sep="") #name the layers
   
-  reg.ext <- raster::extent(minlon, maxlon, minlat, maxlat) # regional extent
-  lc.rt <- prep.mcd12(lc.path, lc.pattern, y, lc.max.yr, reg.name, reg.ext)
+  
   
   for (i in 1:length(b01_files)){
     
@@ -44,24 +45,25 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
     b02_file <- stack(b02_files[i])
     b03_file <- stack(b03_files[i])
 
-    qc_file <- stack(qc_files[i])#+1])#+2])
+    qc_file <- stack(qc_files[i])
     #Reproject the reflectance data to the land cover data
-    file1<-raster::projectRaster(b01_file, lc.rt)#proj.rt)
-    file2<-raster::projectRaster(b02_file, lc.rt)#proj.rt)
-    file3<-raster::projectRaster(b03_file, lc.rt)# proj.rt)
+    file1<-raster::projectRaster(b01_file, lc.rt)
+    file2<-raster::projectRaster(b02_file, lc.rt)
+    file3<-raster::projectRaster(b03_file, lc.rt)
     qc_file <- raster::projectRaster(qc_file,lc.rt)
-    #crop the qc files to have the same extent as reflectance bands
-    #qcfile <- crop(qcfile,reg.ext) 
 
-    # APPLY SCALE FACTOR FOR 2018 BUT NOT FOR 2020 (THE DATA ON APPEEARS CHANGED)
+    # APPLY SCALE FACTOR FOR GTA 2018 BUT NOT FOR OTHER YEARS (THE DATA ON 
+    # APPEEARS CHANGED)
+    # *** THIS WILL NEED TO BE CHANGED DEPENDING ON WHEN YOU DOWNLOADED THE 
+    #     MODIS DATA !!!!! ***
     ## apply scale factors for reflectance data in the bands needed for EVI/LSWI calculation
-    if (y==2018){
+    if (y==2018 & length(grep('Toronto',lc.rt))>0){
       file1 <- file1 * 0.0001 #red
       file2 <- file2 * 0.0001 #NIR
       file3 <- file3 * 0.0001 #blue
     }
     
-    ok_qc=c(1073741824, 1073954817, 1075838976, 1075838977, 1075838979, 1076051969,
+    ok_qc=c(1073741824, 1073954817, 1075838976, 1075838977, 1075838979, 1076051969, 1075576832,
             1076625411, 1077149697, 1077362689, 1077411843, 1119879171, 1121976323,
             1123287043, 1123549187, 1128267777, 1130364929, 1130364931, 1131151363,
             1131675649, 1131937795, 1132462083, 1134559235, 1135345667, 1135869955,
@@ -103,11 +105,11 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
     print(paste0("Load MODIS data: ",round(i/length(b01_files)*100,1),"%"))
   }
   
-  rm(b01_file,b02_file,b03_file,file1,file2,file3,file14,qcfile)
+  rm(b01_file,b02_file,b03_file,file1,file2,file3,file14,qc_file)
   
   Inter_EVI_raster_V061 <-raster()
-  #set the number of columns, rows, and extent NEED TO CHANGE DEPENDING ON SITE
-  Inter_EVI_raster_V061 <- brick(ncol=624, nrow=552, xmn=minlon, xmx=maxlon, ymn=minlat, ymx=maxlat,nl=380)
+  #set the number of columns, rows, and extent
+  Inter_EVI_raster_V061 <- brick(ncol=ncol(lc.rt), nrow=nrow(lc.rt), xmn=minlon, xmx=maxlon, ymn=minlat, ymx=maxlat,nl=380)
   res(Inter_EVI_raster_V061)
   #check the number of cells is 344448 for the GTA
   ncell(Inter_EVI_raster_V061)
@@ -133,13 +135,13 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
   
   library("foreach")
   
-  system.time({foreach::foreach(i = 1:344448) %do% {
+  system.time({foreach::foreach(i = 1:ncell(Inter_EVI_raster_V061)) %do% {
     EVI<-EVI_values_V061[i,]
     pix<-data.frame(DOY,EVI)
     names(pix)<-c('DOY','EVI')
     if(abs(sum(EVI,na.rm=TRUE))>0){
       spl<- with(pix[!is.na(pix$EVI),],smooth.spline(DOY,EVI, spar = .25)) #.25
-      Inter_EVI_values_V061[i,]<-predict(spl, c(-3:376))$y #Change to -3:374 for non-leap year, -3:376 for leap year
+      Inter_EVI_values_V061[i,]<-predict(spl, c(-3:374))$y #Change to -3:374 for non-leap year, -3:376 for leap year
     }
   }})
   values(Inter_EVI_raster_V061)<-Inter_EVI_values_V061
@@ -147,9 +149,9 @@ mod_EVI <- function(mod_dir='C:/Users/kitty/Documents/Research/SIF/UrbanVPRM/Urb
   
   if (as.numeric(y)%%4==0){
     #print(y)
-    Inter_EVI_raster<-dropLayer(Inter_EVI_raster_V061,c(1,2,3,4,371:380)) # select only data in the current year change to 371 for leap & 370 for non-leap year
+    Inter_EVI_raster<-dropLayer(Inter_EVI_raster_V061,c(1,2,3,4,371:380)) # select only data in the current year 
   }else{
-    Inter_EVI_raster<-dropLayer(Inter_EVI_raster_V061,c(1,2,3,4,370:380)) # select only data in the current year change to 371 for leap & 370 for non-leap year
+    Inter_EVI_raster<-dropLayer(Inter_EVI_raster_V061,c(1,2,3,4,370:380)) # select only data in the current year, 370 for non-leap year
   }
   
   #  #THIS WORKS!!! :D

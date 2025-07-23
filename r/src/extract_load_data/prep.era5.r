@@ -12,6 +12,8 @@
 #' so I need to move the UTC from ENDING hour to STARTING hour 
 #     to be consistent with the hour convention for fluxes
 
+#' 03/13/2024, SM, fixed issue with leap years for calculating day of month
+
 #' @param timestr in the form of YYYYMMDDHH
 #' @param tz indicating the time zone of @param timestr
 #' @param era5.varname like '2T_', 'SSRD_', 'STL1_', 'SWVL1_' indicating the variables 
@@ -40,7 +42,8 @@ prep.era5 <- function(era5.path, era5.varname = c('2T', 'SSRD', 'STL1', 'SWVL1')
     last.date <- seq.dates[length(seq.dates)]
 
     # check to see if last.date is the last day of a month
-    # I adjusted the line below so it works for leap-years (now includes year and month not just month)
+    # SM, adjusted the line below so it works for leap-years (now includes year 
+    # and month not just month) 03/13/2024
     dom <- lubridate::days_in_month(substr(last.date, 1, 10))
     if (as.numeric(substr(last.date, 9, 10)) == dom && substr(last.date, 12, 13) == '23') {
         cat('prep.era5(): encountered the last day of a month, need to grab an additional file\n')
@@ -51,7 +54,7 @@ prep.era5 <- function(era5.path, era5.varname = c('2T', 'SSRD', 'STL1', 'SWVL1')
     uni.yyyymm <- c(unique(format(seq.dates, format = '%Y%m')), add.yyyymm)
 
 
-    # search for monthly ERA5 files first (hourly Tair stored in a montly manner)
+    # search for monthly ERA5 files first (hourly Tair stored in a monthly manner)
     # if not, look for annual ERA5 file (hourly Tair stored in a yearly manner)
     era5.file <- NULL
     for (m in uni.yyyymm) {

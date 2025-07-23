@@ -1,5 +1,6 @@
 #' script to transform daily mean Reco to the correct form for predicting NEE
 #' @author: Dien Wu, 08/09/2019 
+#' updated by @author Sabrina Madsen-Colford, 09/28/2021
 
 #' input:
 #' @param timestr YYYYMMDDHH
@@ -23,7 +24,7 @@ crop.smurf.reco <- function(timestr, reco.file, nhrs, site.ext = NULL) {
 
     # get reco rasterStack dimensions, second since 1970-01-01
     #reco.names <- as.numeric(gsub('X', '', names(reco.mean)))
-    #NOTE: I REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
+    #SM: I REPLACED THE LINE ABOVE WITH THE LINE BELOW (WAS NOT CONVERTING TO TIME CORRECTLY)
     reco.names <- gsub('\\.','/',gsub('X', '', names(reco.mean)))
     reco.dates <- as.POSIXct(reco.names, origin = '1970-01-01 00:00:00', tz = 'UTC')
     reco.timestr <- as.numeric(paste0(format(reco.dates, '%Y%m%d')))
